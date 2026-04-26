@@ -1,0 +1,45 @@
+# 위르겐 몰트만(Jürgen Moltmann) 전집 메타데이터
+# 인제스트 파이프라인이 data/raw/moltmann/ 의 PDF를 이 목록과 매칭합니다.
+# `file` 필드는 실제 PDF 파일명과 일치해야 합니다.
+
+author:
+  key: moltmann
+  name_ko: 위르겐 몰트만
+  name_de: Jürgen Moltmann
+  name_en: Jürgen Moltmann
+  born: 1926
+  tradition: 개혁교회 (독일)
+
+works:
+  - file: 01_희망의_신학.pdf
+    title: 희망의 신학
+    title_original: Theologie der Hoffnung
+    year: 1964
+  - file: 02_십자가에_달리신_하나님.pdf
+    title: 십자가에 달리신 하나님
+    title_original: Der gekreuzigte Gott
+    year: 1972
+  - file: 03_성령의_능력_안에_있는_교회.pdf
+    title: 성령의 능력 안에 있는 교회
+    title_original: Kirche in der Kraft des Geistes
+    year: 1975
+  - file: 04_삼위일체와_하나님의_나라.pdf
+    title: 삼위일체와 하나님의 나라
+    title_original: Trinität und Reich Gottes
+    year: 1980
+  - file: 05_창조_안에_계신_하느님.pdf
+    title: 창조 안에 계신 하느님
+    title_original: Gott in der Schöpfung
+    year: 1985
+  - file: 06_예수_그리스도의_길.pdf
+    title: 예수 그리스도의 길
+    title_original: Der Weg Jesu Christi
+    year: 1989
+  - file: 07_생명의_영.pdf
+    title: 생명의 영
+    title_original: Der Geist des Lebens
+    year: 1991
+  - file: 08_오시는_하나님.pdf
+    title: 오시는 하나님
+    title_original: Das Kommen Gottes
+    year: 1995
