@@ -1,1 +1,1 @@
-# SacramentalProject
+# Symposium Project
