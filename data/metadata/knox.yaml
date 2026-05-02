@@ -1,0 +1,22 @@
+author:
+  key: knox
+  name_ko: 존 낙스
+  name_en: John Knox
+  born: 1514
+  tradition: 장로교
+works:
+- file: works_vol1.txt
+  title: The Works of John Knox Vol.1 (낙스 저작집)
+  year: 1846
+- file: works_vol2.txt
+  title: The Works of John Knox Vol.2 (낙스 저작집)
+  year: 1846
+- file: first_blast.txt
+  title: The First Blast of the Trumpet Against the Monstrous Regiment of Women (여성의 괴물적 통치에 반대하는 첫 번째 나팔)
+  year: 1558
+- file: history_of_reformation.txt
+  title: The History of the Reformation of Religion in Scotland (스코틀랜드 종교개혁사)
+  year: 1587
+- file: treatise_on_prayer.txt
+  title: A Treatise on Prayer (기도론)
+  year: 1553

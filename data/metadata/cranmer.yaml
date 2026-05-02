@@ -1,0 +1,29 @@
+author:
+  key: cranmer
+  name_ko: 토마스 크랜머
+  name_en: Thomas Cranmer
+  born: 1489
+  died: 1556
+  tradition: 성공회
+works:
+  - title: "A Defence of the True and Catholic Doctrine of the Sacrament"
+    file: defence_of_sacrament_1825.txt
+    year: 1550
+    edition: "1825 edition, ed. Henry John Todd"
+    source: "https://archive.org/details/defenceoftruecat1825cran"
+    format: djvu_txt_ocr
+    language: en
+  - title: "Writings and Disputations relative to the Sacrament of the Lord's Supper"
+    file: writings_disputations_vol1.txt
+    year: 1844
+    edition: "Parker Society, Vol. 1, ed. John Edmund Cox"
+    source: "https://archive.org/details/writingsanddispu01cranuoft"
+    format: djvu_txt_ocr
+    language: en
+  - title: "Miscellaneous Writings and Letters"
+    file: works_vol2_parker_society.txt
+    year: 1846
+    edition: "Parker Society, Vol. 2, ed. John Edmund Cox"
+    source: "https://archive.org/details/worksofthomascra21cran"
+    format: djvu_txt_ocr
+    language: en

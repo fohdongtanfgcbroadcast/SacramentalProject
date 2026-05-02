@@ -1,0 +1,24 @@
+author:
+  key: vermigli
+  name_ko: 피터 버미글리
+  name_en: Peter Martyr Vermigli
+  born: 1499
+  died: 1562
+  tradition: 개혁파
+works:
+  - title: "The Common Places, Volume 1"
+    file: common_places_vol1.txt
+    year: 1583
+    edition: "English translation by Anthonie Marten (1583/1639 reprint)"
+    source: "https://archive.org/details/PeterMartyrVermigliCommonPlacesA1639"
+    format: djvu_txt_ocr
+    language: en
+    note: "Early Modern English, OCR from blackletter typeface"
+  - title: "The Common Places, Volume 2"
+    file: common_places_vol2.txt
+    year: 1583
+    edition: "English translation by Anthonie Marten (1583)"
+    source: "https://archive.org/details/PeterMartyrVermigliCommonPlacesB1376"
+    format: djvu_txt_ocr
+    language: en
+    note: "Early Modern English, OCR from blackletter typeface"

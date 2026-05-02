@@ -1,0 +1,36 @@
+author:
+  key: bullinger
+  name_ko: 하인리히 불링어
+  name_en: Heinrich Bullinger
+  born: 1504
+  tradition: 개혁파 (취리히)
+works:
+- file: cohabitation_treatise.txt
+  title: A Treatise of the Cohabitacyon of the Faithfull with the Vnfaithfull (불신자와의 교제론)
+  year: 1555
+  source: gutenberg
+  gutenberg_id: 22151
+- file: decades_1_2.txt
+  title: The Decades - First and Second Decades (데카데스 제1-2집)
+  year: 1849
+  source: archive.org
+  archive_id: decadesofbulling01bulluoft
+  note: Parker Society edition, trans. H.I.
+- file: decades_3_4.txt
+  title: The Decades - Third and Fourth Decades (데카데스 제3-4집)
+  year: 1850
+  source: archive.org
+  archive_id: decadesofhenrybu02bulluoft
+  note: Parker Society edition, trans. H.I.
+- file: decades_4.txt
+  title: The Decades - Fourth Decade (데카데스 제4집)
+  year: 1851
+  source: archive.org
+  archive_id: decadesofhenrybu04bull
+  note: Parker Society edition, alternate copy
+- file: decades_5.txt
+  title: The Decades - Fifth Decade (데카데스 제5집)
+  year: 1852
+  source: archive.org
+  archive_id: decadesofhenrybu05bulluoft
+  note: Parker Society edition, trans. H.I.
