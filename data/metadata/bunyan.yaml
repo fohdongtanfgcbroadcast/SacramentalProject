@@ -1,0 +1,16 @@
+author:
+  key: bunyan
+  name_ko: 존 번연
+  name_en: John Bunyan
+  born: 1628
+  tradition: 청교도/침례교
+works:
+- file: pilgrims_progress.txt
+  title: The Pilgrim's Progress (천로역정)
+  year: 1678
+- file: grace_abounding.txt
+  title: Grace Abounding to the Chief of Sinners (죄인의 우두머리에게 넘치는 은혜)
+  year: 1666
+- file: holy_war.txt
+  title: The Holy War (거룩한 전쟁)
+  year: 1682

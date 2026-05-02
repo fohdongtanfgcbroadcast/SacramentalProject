@@ -1,0 +1,10 @@
+author:
+  key: zinzendorf
+  name_ko: 니콜라우스 친첸도르프
+  name_en: Nikolaus von Zinzendorf
+  born: 1700
+  tradition: 모라비안
+works:
+- file: twenty_one_discourses.txt
+  title: Twenty One Discourses or Dissertations upon the Augsburg Confession (아우크스부르크 신앙고백에 관한 21편의 강론)
+  year: 1753

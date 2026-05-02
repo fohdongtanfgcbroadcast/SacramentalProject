@@ -1,0 +1,22 @@
+author:
+  key: wesley
+  name_ko: 존 웨슬리
+  name_en: John Wesley
+  born: 1703
+  tradition: 감리교
+works:
+- file: sermons.txt
+  title: Sermons on Several Occasions (설교집)
+  year: 1771
+- file: christian_perfection.txt
+  title: A Plain Account of Christian Perfection (완전 성화)
+  year: 1766
+- file: journal_vol1.txt
+  title: Journal Vol.1 (일지)
+  year: 1735
+- file: sermons_vol2.txt
+  title: Works Vol.4 - Sermons on Several Occasions (설교집 2)
+  year: 1771
+- file: earnest_appeal.txt
+  title: Works Vol.14 - An Earnest Appeal to Men of Reason and Religion (이성과 종교에 대한 진지한 호소)
+  year: 1744

@@ -1,0 +1,17 @@
+author:
+  key: whitefield
+  name_ko: 조지 휫필드
+  name_en: George Whitefield
+  born: 1714
+  tradition: 감리교/칼뱅주의
+works:
+- file: works_vol1_journals.txt
+  title: "The Works of the Reverend George Whitefield, Vol. 1 (일지 및 서신)"
+  year: 1771
+  gutenberg_id: 68976
+  description: "Journals, voyages, and letters from 1735-1745"
+- file: works_vol4_sermons.txt
+  title: "The Works of the Reverend George Whitefield, Vol. 4 (설교 및 소책자)"
+  year: 1771
+  gutenberg_id: 73267
+  description: "Sermons and tracts, with select collection of letters"

@@ -1,0 +1,22 @@
+author:
+  key: edwards
+  name_ko: 조나단 에드워즈
+  name_en: Jonathan Edwards
+  born: 1703
+  tradition: 회중교회 (칼뱅주의)
+works:
+- file: religious_affections.txt
+  title: Religious Affections (종교적 정서론)
+  year: 1746
+- file: freedom_of_the_will.txt
+  title: Freedom of the Will (의지의 자유)
+  year: 1754
+- file: selected_sermons.txt
+  title: Selected Sermons (설교 선집)
+  year: 1741
+- file: original_sin.txt
+  title: The Great Christian Doctrine of Original Sin Defended (원죄론)
+  year: 1758
+- file: life_of_brainerd.txt
+  title: The Life of Rev. David Brainerd (데이비드 브레이너드의 생애)
+  year: 1749

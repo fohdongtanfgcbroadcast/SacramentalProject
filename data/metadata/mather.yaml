@@ -1,0 +1,16 @@
+author:
+  key: mather
+  name_ko: 코튼 매더
+  name_en: Cotton Mather
+  born: 1663
+  tradition: 청교도/회중교회
+works:
+- file: magnalia_vol1.txt
+  title: Magnalia Christi Americana Vol.1 (미국 그리스도교 위업사 1)
+  year: 1702
+- file: magnalia_vol2.txt
+  title: Magnalia Christi Americana Vol.2 (미국 그리스도교 위업사 2)
+  year: 1702
+- file: wonders_invisible_world.txt
+  title: The Wonders of the Invisible World (보이지 않는 세계의 경이)
+  year: 1693

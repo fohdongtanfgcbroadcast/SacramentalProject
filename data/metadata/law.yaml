@@ -1,0 +1,16 @@
+author:
+  key: law
+  name_ko: 윌리엄 로
+  name_en: William Law
+  born: 1686
+  tradition: 성공회/신비주의
+works:
+- file: serious_call.txt
+  title: A Serious Call to a Devout and Holy Life (경건한 삶에 대한 진지한 부름)
+  year: 1728
+- file: christian_perfection.txt
+  title: Christian Perfection (그리스도인의 완전)
+  year: 1726
+- file: spirit_of_prayer.txt
+  title: The Spirit of Prayer (기도의 영)
+  year: 1749

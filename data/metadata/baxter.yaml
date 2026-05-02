@@ -1,0 +1,19 @@
+author:
+  key: baxter
+  name_ko: 리처드 백스터
+  name_en: Richard Baxter
+  born: 1615
+  tradition: 청교도/장로교
+works:
+- file: reformed_pastor.txt
+  title: The Reformed Pastor (개혁된 목사)
+  year: 1656
+  source: https://ccel.org/ccel/baxter/pastor
+- file: saints_everlasting_rest.txt
+  title: "The Saints' Everlasting Rest (성도의 영원한 안식)"
+  year: 1650
+  source: https://www.gutenberg.org/ebooks/58135
+- file: call_to_unconverted.txt
+  title: A Call to the Unconverted (회심하지 않은 자들에 대한 부름)
+  year: 1658
+  source: https://digitalpuritan.net/richard-baxter/
