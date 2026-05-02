@@ -17,3 +17,15 @@ works:
   title: A Call to the Unconverted (회심하지 않은 자들에 대한 부름)
   year: 1658
   source: https://digitalpuritan.net/richard-baxter/
+- file: christian_directory_1.txt
+  title: "A Christian Directory Part 1: Christian Ethics (기독교 윤리)"
+  year: 1673
+- file: christian_directory_2.txt
+  title: "A Christian Directory Part 2: Christian Economics (기독교 가정학)"
+  year: 1673
+- file: christian_directory_3.txt
+  title: "A Christian Directory Part 3: Christian Ecclesiastics (기독교 교회론)"
+  year: 1673
+- file: christian_directory_4.txt
+  title: "A Christian Directory Part 4: Christian Politics (기독교 정치학)"
+  year: 1673

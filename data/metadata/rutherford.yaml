@@ -1,0 +1,10 @@
+author:
+  key: rutherford
+  name_ko: 사무엘 러더퍼드
+  name_en: Samuel Rutherford
+  born: 1600
+  tradition: 장로교
+works:
+- file: letters.txt
+  title: Letters of Samuel Rutherford (사무엘 러더퍼드 서신집)
+  year: 1664

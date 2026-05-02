@@ -1,0 +1,15 @@
+author:
+  key: owen
+  name_ko: 존 오웬
+  name_en: John Owen
+  born: 1616
+  tradition: 청교도/회중교회
+works:
+- file: mortification_of_sin.txt
+  title: Of the Mortification of Sin in Believers (신자의 죄 죽임에 관하여)
+  year: 1656
+  source: CCEL (Christian Classics Ethereal Library)
+- file: communion_with_god.txt
+  title: Of Communion with God the Father, Son and Holy Ghost (하나님 아버지, 아들, 성령과의 교제에 관하여)
+  year: 1657
+  source: CCEL (Christian Classics Ethereal Library)

@@ -45,14 +45,47 @@ async function init() {
   }
 }
 
+const ERA_GROUPS = [
+  { label: "교부 시대",           color: "#c084fc", min: 0,    max: 499  },
+  { label: "중세 초기",           color: "#a78bfa", min: 500,  max: 999  },
+  { label: "중세",              color: "#818cf8", min: 1000, max: 1479 },
+  { label: "종교개혁",            color: "#f97316", min: 1480, max: 1599 },
+  { label: "경건주의 / 부흥운동",   color: "#fb923c", min: 1600, max: 1799 },
+  { label: "현대",              color: "#6b8afd", min: 1800, max: 9999 },
+];
+
+function getEra(born) {
+  return ERA_GROUPS.find(e => born >= e.min && born <= e.max) || ERA_GROUPS[ERA_GROUPS.length - 1];
+}
+
 function renderTheologianList() {
-  theologianList.innerHTML = allAuthors.map(a => `
-    <label class="theologian-check-item" data-key="${a.key}">
-      <input type="checkbox" value="${a.key}">
-      <span class="theologian-check-name">${a.name_ko}</span>
-      <span class="theologian-check-works">${a.work_count}권</span>
-    </label>
-  `).join("");
+  // 시대별 그룹핑
+  const groups = new Map();
+  for (const a of allAuthors) {
+    const era = getEra(a.born);
+    if (!groups.has(era.label)) groups.set(era.label, { era, authors: [] });
+    groups.get(era.label).authors.push(a);
+  }
+
+  let html = "";
+  for (const { era, authors } of groups.values()) {
+    html += `<div class="era-group">
+      <div class="era-group-header">
+        <span class="era-group-dot" style="background:${era.color}"></span>
+        <span class="era-group-label">${era.label}</span>
+      </div>`;
+    for (const a of authors) {
+      html += `
+      <label class="theologian-check-item" data-key="${a.key}">
+        <input type="checkbox" value="${a.key}">
+        <span class="theologian-check-name">${a.name_ko}</span>
+        <span class="theologian-check-works">${a.work_count}권</span>
+      </label>`;
+    }
+    html += `</div>`;
+  }
+
+  theologianList.innerHTML = html;
 
   theologianList.querySelectorAll('input[type="checkbox"]').forEach(cb => {
     cb.addEventListener("change", onSelectionChange);

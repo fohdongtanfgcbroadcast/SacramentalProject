@@ -72,6 +72,8 @@ class AuthorInfo(BaseModel):
     key: str
     name_ko: str
     work_count: int
+    born: int = 0
+    tradition: str = ""
 
 
 class SymposiumStartRequest(BaseModel):
@@ -133,7 +135,7 @@ def _format_glossary_section(terms: list[dict]) -> str:
 # --- Helpers ---
 
 def _get_available_authors() -> list[AuthorInfo]:
-    """메타데이터 YAML이 있는 저자 목록 반환."""
+    """메타데이터 YAML이 있는 저자 목록 반환 (시대순 정렬)."""
     import yaml
 
     authors = []
@@ -142,11 +144,15 @@ def _get_available_authors() -> list[AuthorInfo]:
             meta = yaml.safe_load(f) or {}
         author_info = meta.get("author", {})
         works = meta.get("works", [])
+        born = author_info.get("born", 0)
         authors.append(AuthorInfo(
             key=author_info.get("key", yml.stem),
             name_ko=author_info.get("name_ko", yml.stem),
             work_count=len(works),
+            born=born if isinstance(born, int) else 0,
+            tradition=author_info.get("tradition", ""),
         ))
+    authors.sort(key=lambda a: a.born)
     return authors
 
 

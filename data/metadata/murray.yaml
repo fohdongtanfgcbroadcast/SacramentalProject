@@ -1,0 +1,16 @@
+author:
+  key: murray
+  name_ko: 앤드루 머레이
+  name_en: Andrew Murray
+  born: 1828
+  tradition: 네덜란드 개혁교회
+works:
+- file: lord_teach_us_to_pray.txt
+  title: "Lord, Teach Us to Pray (주여, 기도를 가르쳐 주소서)"
+  year: 1896
+- file: humility.txt
+  title: "Humility: The Beauty of Holiness (겸손: 거룩함의 아름다움)"
+  year: 1895
+- file: ministry_of_intercession.txt
+  title: The Ministry of Intercession (중보 기도의 사역)
+  year: 1898

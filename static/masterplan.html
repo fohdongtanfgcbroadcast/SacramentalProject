@@ -1,0 +1,973 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Symposium — 신학의 향연</title>
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  --bg: #0a0a0a;
+  --surface: #141414;
+  --card: #1a1a1a;
+  --border: #252525;
+  --text: #e0e0e0;
+  --text-dim: #777;
+  --text-muted: #555;
+  --accent: #6b8afd;
+  --gold: #d4a853;
+  --green: #4ade80;
+  --era-patristic: #c084fc;
+  --era-medieval-early: #a78bfa;
+  --era-medieval: #818cf8;
+  --era-reformation: #f97316;
+  --era-pietism: #fb923c;
+  --era-liberal: #38bdf8;
+  --era-neoorthodox: #2dd4bf;
+  --era-modern: #6b8afd;
+}
+
+body {
+  font-family: 'Noto Serif KR', 'Georgia', serif;
+  background: var(--bg);
+  color: var(--text);
+  min-height: 100vh;
+  line-height: 1.6;
+}
+
+/* Hero */
+.hero {
+  text-align: center;
+  padding: 5rem 1rem 3rem;
+  background: linear-gradient(180deg, #111 0%, var(--bg) 100%);
+  border-bottom: 1px solid var(--border);
+}
+
+.hero h1 {
+  font-size: 3.5rem;
+  font-weight: 300;
+  letter-spacing: 0.3em;
+  color: var(--gold);
+  margin-bottom: 0.5rem;
+}
+
+.hero .subtitle {
+  font-size: 1.1rem;
+  color: var(--text-dim);
+  font-weight: 300;
+  letter-spacing: 0.1em;
+}
+
+.hero .desc {
+  max-width: 600px;
+  margin: 2rem auto 0;
+  font-size: 0.95rem;
+  color: var(--text-dim);
+  line-height: 1.8;
+}
+
+.hero .stats {
+  display: flex;
+  justify-content: center;
+  gap: 3rem;
+  margin-top: 2.5rem;
+}
+
+.stat {
+  text-align: center;
+}
+
+.stat-number {
+  font-size: 2.5rem;
+  font-weight: 300;
+  color: var(--gold);
+  display: block;
+}
+
+.stat-label {
+  font-size: 0.8rem;
+  color: var(--text-muted);
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+}
+
+/* Timeline */
+.timeline {
+  max-width: 900px;
+  margin: 0 auto;
+  padding: 3rem 1rem;
+}
+
+.era {
+  margin-bottom: 3rem;
+}
+
+.era-header {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  margin-bottom: 1.2rem;
+  padding-bottom: 0.5rem;
+  border-bottom: 1px solid var(--border);
+}
+
+.era-dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.era-title {
+  font-size: 1.1rem;
+  font-weight: 400;
+  letter-spacing: 0.05em;
+}
+
+.era-period {
+  font-size: 0.8rem;
+  color: var(--text-muted);
+  margin-left: auto;
+}
+
+.theologians {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+  gap: 0.8rem;
+  padding-left: 1.5rem;
+}
+
+.card {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 1rem 1.2rem;
+  transition: border-color 0.2s, transform 0.2s;
+  position: relative;
+}
+
+.card:hover {
+  border-color: var(--text-muted);
+  transform: translateY(-2px);
+}
+
+.card.done {
+  border-color: var(--green);
+  background: #0a1a0a;
+}
+
+.card.done::after {
+  content: "LIVE";
+  position: absolute;
+  top: 0.6rem;
+  right: 0.8rem;
+  font-size: 0.6rem;
+  font-weight: 700;
+  color: var(--green);
+  letter-spacing: 0.1em;
+  font-family: -apple-system, sans-serif;
+  background: rgba(74, 222, 128, 0.1);
+  padding: 0.15rem 0.4rem;
+  border-radius: 3px;
+}
+
+.card-name {
+  font-size: 1rem;
+  font-weight: 500;
+  margin-bottom: 0.2rem;
+}
+
+.card-years {
+  font-size: 0.75rem;
+  color: var(--text-muted);
+  margin-bottom: 0.4rem;
+  font-family: -apple-system, sans-serif;
+}
+
+.card-desc {
+  font-size: 0.82rem;
+  color: var(--text-dim);
+  line-height: 1.5;
+}
+
+.card-stat {
+  font-size: 0.7rem;
+  color: var(--green);
+  margin-top: 0.5rem;
+  font-family: -apple-system, sans-serif;
+}
+
+.card-works {
+  margin-top: 0.5rem;
+  padding-top: 0.5rem;
+  border-top: 1px solid var(--border);
+  font-size: 0.72rem;
+  color: var(--text-muted);
+  font-family: -apple-system, sans-serif;
+  line-height: 1.6;
+}
+
+.card-works span {
+  display: block;
+}
+
+/* Footer */
+.footer {
+  text-align: center;
+  padding: 3rem 1rem;
+  border-top: 1px solid var(--border);
+  color: var(--text-muted);
+  font-size: 0.8rem;
+  font-family: -apple-system, sans-serif;
+}
+
+.footer a {
+  color: var(--accent);
+  text-decoration: none;
+}
+
+/* Vision */
+.vision {
+  max-width: 700px;
+  margin: 0 auto;
+  padding: 2rem 1rem 3rem;
+  text-align: center;
+}
+
+.vision h2 {
+  font-size: 1.3rem;
+  font-weight: 300;
+  color: var(--gold);
+  letter-spacing: 0.1em;
+  margin-bottom: 1rem;
+}
+
+.vision p {
+  font-size: 0.92rem;
+  color: var(--text-dim);
+  line-height: 1.9;
+}
+
+@media (max-width: 600px) {
+  .hero h1 { font-size: 2.2rem; letter-spacing: 0.15em; }
+  .hero .stats { gap: 1.5rem; }
+  .stat-number { font-size: 1.8rem; }
+  .theologians { grid-template-columns: 1fr; padding-left: 0; }
+}
+</style>
+</head>
+<body>
+
+<section class="hero">
+  <h1>SYMPOSIUM</h1>
+  <p class="subtitle">신학의 향연</p>
+  <p class="desc">
+    교부 시대부터 현대까지, 2천 년 기독교 신학의 핵심 저작을 탐색합니다.
+    질문을 던지면 원문에 근거한 답변을 돌려드립니다.
+  </p>
+  <div class="stats">
+    <div class="stat">
+      <span class="stat-number">48</span>
+      <span class="stat-label">신학자</span>
+    </div>
+    <div class="stat">
+      <span class="stat-number">30</span>
+      <span class="stat-label">신앙고백서</span>
+    </div>
+    <div class="stat">
+      <span class="stat-number">32</span>
+      <span class="stat-label">인제스트 완료</span>
+    </div>
+    <div class="stat">
+      <span class="stat-number">326,651</span>
+      <span class="stat-label">청크</span>
+    </div>
+  </div>
+</section>
+
+<section class="timeline">
+
+  <div class="era">
+    <div class="era-header">
+      <div class="era-dot" style="background:var(--era-patristic)"></div>
+      <span class="era-title">교부 시대</span>
+      <span class="era-period">2~5세기</span>
+    </div>
+    <div class="theologians">
+      <div class="card done">
+        <div class="card-name">아타나시우스</div>
+        <div class="card-years">296–373</div>
+        <div class="card-desc">성육신론, 니케아 신학</div>
+        <div class="card-stat">5권 / 26,443 청크</div>
+        <div class="card-works">
+          <span>On the Incarnation (성육신론)</span>
+          <span>Select Works and Letters (NPNF2-04 전집)</span>
+          <span>Festal Letters (축일 서신)</span>
+          <span>Historical Tracts (역사적 논문집)</span>
+          <span>Complete Works (전집)</span>
+        </div>
+      </div>
+      <div class="card done">
+        <div class="card-name">요한 크리소스토모스</div>
+        <div class="card-years">347–407</div>
+        <div class="card-desc">설교, 성경 주석</div>
+        <div class="card-stat">6권 / 41,371 청크</div>
+        <div class="card-works">
+          <span>On the Priesthood; Select Homilies (NPNF1-09)</span>
+          <span>Homilies on Matthew (NPNF1-10)</span>
+          <span>Homilies on Acts & Romans (NPNF1-11)</span>
+          <span>Homilies on 1 & 2 Corinthians (NPNF1-12)</span>
+          <span>Homilies on Galatians–Philemon (NPNF1-13)</span>
+          <span>Homilies on John & Hebrews (NPNF1-14)</span>
+        </div>
+      </div>
+      <div class="card done">
+        <div class="card-name">아우구스티누스</div>
+        <div class="card-years">354–430</div>
+        <div class="card-desc">고백록, 삼위일체론, 신국론</div>
+        <div class="card-stat">8권 / 59,556 청크</div>
+        <div class="card-works">
+          <span>Confessions & Letters (NPNF1-01)</span>
+          <span>City of God & On Christian Doctrine (NPNF1-02)</span>
+          <span>On the Holy Trinity & Doctrinal Treatises (NPNF1-03)</span>
+          <span>Against the Manichaeans & Donatists (NPNF1-04)</span>
+          <span>Anti-Pelagian Writings (NPNF1-05)</span>
+          <span>Sermon on the Mount & Gospel Homilies (NPNF1-06)</span>
+          <span>Homilies on John & 1 John (NPNF1-07)</span>
+          <span>Exposition on the Psalms (NPNF1-08)</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="era">
+    <div class="era-header">
+      <div class="era-dot" style="background:var(--era-medieval-early)"></div>
+      <span class="era-title">중세 초기</span>
+      <span class="era-period">6~8세기</span>
+    </div>
+    <div class="theologians">
+      <div class="card done">
+        <div class="card-name">누르시아의 베네딕투스</div>
+        <div class="card-years">480–547</div>
+        <div class="card-desc">베네딕투스 규칙서, 서유럽 수도원 운동의 아버지</div>
+        <div class="card-stat">1권 / 246 청크</div>
+        <div class="card-works">
+          <span>Rule of St. Benedict (수도원 규칙서)</span>
+        </div>
+      </div>
+      <div class="card done">
+        <div class="card-name">대교황 그레고리우스 1세</div>
+        <div class="card-years">540–604</div>
+        <div class="card-desc">목회규범서, 서방 교회 체계화, 4대 교부</div>
+        <div class="card-stat">6권 / 16,380 청크</div>
+        <div class="card-works">
+          <span>Pastoral Rule & Selected Epistles (NPNF2-12)</span>
+          <span>Epistles (NPNF2-13)</span>
+          <span>Life of St. Benedict & Rule (Dialogues Book II)</span>
+          <span>Dialogues (대화록 전체)</span>
+          <span>Morals on the Book of Job Vol.1 (욥기 도덕론)</span>
+          <span>Morals on the Book of Job Vol.2-3</span>
+        </div>
+      </div>
+      <div class="card done">
+        <div class="card-name">요한 다마스쿠스</div>
+        <div class="card-years">~676–749</div>
+        <div class="card-desc">정교 신앙 해설, 동방 교부 집대성</div>
+        <div class="card-stat">3권 / 6,860 청크</div>
+        <div class="card-works">
+          <span>Exposition of the Orthodox Faith (NPNF2-09)</span>
+          <span>On Holy Images (성상론)</span>
+          <span>Barlaam and Ioasaph</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="era">
+    <div class="era-header">
+      <div class="era-dot" style="background:var(--era-medieval)"></div>
+      <span class="era-title">중세</span>
+      <span class="era-period">11~15세기</span>
+    </div>
+    <div class="theologians">
+      <div class="card done">
+        <div class="card-name">안셀무스</div>
+        <div class="card-years">1033–1109</div>
+        <div class="card-desc">존재론적 신 증명, 속죄론</div>
+        <div class="card-stat">3권 / 2,674 청크</div>
+        <div class="card-works">
+          <span>Proslogium, Monologium, Cur Deus Homo</span>
+          <span>Devotions (기도와 묵상)</span>
+          <span>Book of Meditations and Prayers (묵상과 기도)</span>
+        </div>
+      </div>
+      <div class="card done">
+        <div class="card-name">아시시의 프란체스코</div>
+        <div class="card-years">1181–1226</div>
+        <div class="card-desc">청빈의 영성, 프란체스코회 창설</div>
+        <div class="card-stat">3권 / 3,009 청크</div>
+        <div class="card-works">
+          <span>Writings (규칙, 유언서, 서신, 훈계, 기도)</span>
+          <span>The Little Flowers (피오레티)</span>
+          <span>The Lady Poverty (성녀 가난)</span>
+        </div>
+      </div>
+      <div class="card done">
+        <div class="card-name">토마스 첼라노</div>
+        <div class="card-years">1185–1265</div>
+        <div class="card-desc">프란체스코 전기 작가</div>
+        <div class="card-stat">1권 / 1,319 청크</div>
+        <div class="card-works">
+          <span>First & Second Life of St. Francis (제1·2전기)</span>
+        </div>
+      </div>
+      <div class="card done">
+        <div class="card-name">보나벤투라</div>
+        <div class="card-years">1221–1274</div>
+        <div class="card-desc">프란체스코 신학 체계화, 하나님께로의 정신의 여정</div>
+        <div class="card-stat">6권 / 5,165 청크</div>
+        <div class="card-works">
+          <span>The Mind's Road to God (하나님께로의 정신의 여정)</span>
+          <span>Life of Saint Francis (성 프란체스코의 생애)</span>
+          <span>Breviloquium (소론)</span>
+          <span>Life of Our Lord Jesus Christ</span>
+          <span>Holiness of Life (완전한 삶)</span>
+          <span>Meditations on the Supper of Our Lord</span>
+        </div>
+      </div>
+      <div class="card done">
+        <div class="card-name">토마스 아퀴나스</div>
+        <div class="card-years">1225–1274</div>
+        <div class="card-desc">신학대전, 자연신학</div>
+        <div class="card-stat">9권 / 40,741 청크</div>
+        <div class="card-works">
+          <span>Summa Theologica (전4권)</span>
+          <span>Summa Contra Gentiles (대이교도대전)</span>
+          <span>Catena Aurea — Matthew, Mark (주석)</span>
+          <span>Nature and Grace (자연과 은총)</span>
+          <span>On Prayer and the Contemplative Life</span>
+        </div>
+      </div>
+      <div class="card done">
+        <div class="card-name">클레르보의 베르나르</div>
+        <div class="card-years">1090–1153</div>
+        <div class="card-desc">시토회, 하나님 사랑론</div>
+        <div class="card-stat">3권 / 2,461 청크</div>
+        <div class="card-works">
+          <span>On Loving God (하나님 사랑에 대하여)</span>
+          <span>Some Letters (서신집)</span>
+          <span>Life of St. Malachy of Armagh</span>
+        </div>
+      </div>
+      <div class="card done">
+        <div class="card-name">마이스터 에크하르트</div>
+        <div class="card-years">1260–1328</div>
+        <div class="card-desc">도미니코회 신비주의</div>
+        <div class="card-stat">2권 / 771 청크</div>
+        <div class="card-works">
+          <span>Sermons (설교집)</span>
+          <span>Mystische Schriften (신비 저작, 독일어)</span>
+        </div>
+      </div>
+      <div class="card done">
+        <div class="card-name">둔스 스코투스</div>
+        <div class="card-years">1266–1308</div>
+        <div class="card-desc">프란체스코회 스콜라 신학</div>
+        <div class="card-stat">1권 / 1,375 청크</div>
+        <div class="card-works">
+          <span>Philosophical Writings (철학 저작 선집)</span>
+        </div>
+      </div>
+      <div class="card done">
+        <div class="card-name">노리치의 줄리안</div>
+        <div class="card-years">1342–1416</div>
+        <div class="card-desc">신비주의, 여성 신학자</div>
+        <div class="card-stat">1권 / 760 청크</div>
+        <div class="card-works">
+          <span>Revelations of Divine Love (신적 사랑의 계시)</span>
+        </div>
+      </div>
+      <div class="card done">
+        <div class="card-name">토마스 아 켐피스</div>
+        <div class="card-years">1380–1471</div>
+        <div class="card-desc">공동생활 형제회, 경건 문학</div>
+        <div class="card-stat">1권 / 762 청크</div>
+        <div class="card-works">
+          <span>The Imitation of Christ (그리스도를 본받아)</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="era">
+    <div class="era-header">
+      <div class="era-dot" style="background:var(--era-reformation)"></div>
+      <span class="era-title">종교개혁</span>
+      <span class="era-period">16세기</span>
+    </div>
+    <div class="theologians">
+      <div class="card done">
+        <div class="card-name">마르틴 루터</div>
+        <div class="card-years">1483–1546</div>
+        <div class="card-desc">이신칭의, 십자가 신학</div>
+        <div class="card-stat">6권 / 1,560 청크</div>
+        <div class="card-works">
+          <span>95 Theses (95개 논제)</span>
+          <span>Concerning Christian Liberty (기독교인의 자유)</span>
+          <span>Table Talk (식탁담화)</span>
+          <span>Bondage of the Will (의지의 속박)</span>
+          <span>Large Catechism (대교리문답)</span>
+          <span>Commentary on Galatians (갈라디아서 주석)</span>
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-name">울리히 츠빙글리</div>
+        <div class="card-years">1484–1531</div>
+        <div class="card-desc">취리히 개혁, 성찬 논쟁</div>
+      </div>
+      <div class="card">
+        <div class="card-name">마르틴 부처</div>
+        <div class="card-years">1491–1551</div>
+        <div class="card-desc">스트라스부르 개혁, 루터-츠빙글리 중재</div>
+      </div>
+      <div class="card done">
+        <div class="card-name">필립 멜란히톤</div>
+        <div class="card-years">1497–1560</div>
+        <div class="card-desc">아우크스부르크 신앙고백, 루터파 조직신학</div>
+        <div class="card-stat">1권 / 211 청크</div>
+        <div class="card-works">
+          <span>Augsburg Confession (아우크스부르크 신앙고백)</span>
+        </div>
+      </div>
+      <div class="card done">
+        <div class="card-name">장 칼뱅</div>
+        <div class="card-years">1509–1564</div>
+        <div class="card-desc">기독교 강요, 예정론</div>
+        <div class="card-stat">2권 / 6,768 청크</div>
+        <div class="card-works">
+          <span>Institutes of the Christian Religion Vol.1 (기독교 강요)</span>
+          <span>Institutes of the Christian Religion Vol.2</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="era">
+    <div class="era-header">
+      <div class="era-dot" style="background:var(--era-pietism)"></div>
+      <span class="era-title">경건주의 / 부흥운동</span>
+      <span class="era-period">17~18세기</span>
+    </div>
+    <div class="theologians">
+      <div class="card done">
+        <div class="card-name">사무엘 러더퍼드</div>
+        <div class="card-years">1600–1661</div>
+        <div class="card-desc">장로교 신학, 영적 서신</div>
+        <div class="card-stat">1권 / 3,872 청크</div>
+        <div class="card-works">
+          <span>Letters of Samuel Rutherford (사무엘 러더퍼드 서신집)</span>
+        </div>
+      </div>
+      <div class="card done">
+        <div class="card-name">리처드 백스터</div>
+        <div class="card-years">1615–1691</div>
+        <div class="card-desc">청교도 목회 신학, 성도의 안식, 기독교 지침서</div>
+        <div class="card-stat">7권 / 18,586 청크</div>
+        <div class="card-works">
+          <span>The Reformed Pastor (개혁된 목사)</span>
+          <span>The Saints' Everlasting Rest (성도의 영원한 안식)</span>
+          <span>A Call to the Unconverted (회심하지 않은 자들에 대한 부름)</span>
+          <span>A Christian Directory Part 1-4 (기독교 지침서 전4부)</span>
+        </div>
+      </div>
+      <div class="card done">
+        <div class="card-name">존 오웬</div>
+        <div class="card-years">1616–1683</div>
+        <div class="card-desc">청교도 조직신학, 죄의 죽임, 하나님과의 교제</div>
+        <div class="card-stat">2권 / 4,862 청크</div>
+        <div class="card-works">
+          <span>The Mortification of Sin (죄를 죽이는 것)</span>
+          <span>Communion with God (하나님과의 교제)</span>
+        </div>
+      </div>
+      <div class="card done">
+        <div class="card-name">존 번연</div>
+        <div class="card-years">1628–1688</div>
+        <div class="card-desc">천로역정, 청교도 영성 문학</div>
+        <div class="card-stat">3권 / 2,538 청크</div>
+        <div class="card-works">
+          <span>The Pilgrim's Progress (천로역정)</span>
+          <span>Grace Abounding (죄인의 우두머리에게 넘치는 은혜)</span>
+          <span>The Holy War (거룩한 전쟁)</span>
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-name">필리프 야콥 슈페너</div>
+        <div class="card-years">1635–1705</div>
+        <div class="card-desc">경건한 소원, 경건주의의 아버지</div>
+      </div>
+      <div class="card done">
+        <div class="card-name">코튼 매더</div>
+        <div class="card-years">1663–1728</div>
+        <div class="card-desc">청교도 역사, 미국 그리스도교 위업사</div>
+        <div class="card-stat">3권 / 14,368 청크</div>
+        <div class="card-works">
+          <span>Magnalia Christi Americana Vol.1-2 (미국 그리스도교 위업사)</span>
+          <span>The Wonders of the Invisible World (보이지 않는 세계의 경이)</span>
+        </div>
+      </div>
+      <div class="card done">
+        <div class="card-name">아이작 왓츠</div>
+        <div class="card-years">1674–1748</div>
+        <div class="card-desc">찬송시, 시편 해석, 회중교회</div>
+        <div class="card-stat">2권 / 1,285 청크</div>
+        <div class="card-works">
+          <span>Hymns and Spiritual Songs (찬송과 영적 노래)</span>
+          <span>The Psalms of David (다윗의 시편)</span>
+        </div>
+      </div>
+      <div class="card done">
+        <div class="card-name">윌리엄 로</div>
+        <div class="card-years">1686–1761</div>
+        <div class="card-desc">경건한 삶에 대한 진지한 부름, 성공회 신비주의</div>
+        <div class="card-stat">3권 / 3,831 청크</div>
+        <div class="card-works">
+          <span>A Serious Call to a Devout and Holy Life (경건한 삶에 대한 진지한 부름)</span>
+          <span>Christian Perfection (그리스도인의 완전)</span>
+          <span>The Spirit of Prayer (기도의 영)</span>
+        </div>
+      </div>
+      <div class="card done">
+        <div class="card-name">니콜라우스 친첸도르프</div>
+        <div class="card-years">1700–1760</div>
+        <div class="card-desc">모라비안 형제단, 선교 운동</div>
+        <div class="card-stat">1권 / 1,202 청크</div>
+        <div class="card-works">
+          <span>Twenty One Discourses on the Augsburg Confession (아우크스부르크 신앙고백 21강론)</span>
+        </div>
+      </div>
+      <div class="card done">
+        <div class="card-name">조나단 에드워즈</div>
+        <div class="card-years">1703–1758</div>
+        <div class="card-desc">대각성 운동, 의지의 자유, 신의 주권</div>
+        <div class="card-stat">5권 / 4,032 청크</div>
+        <div class="card-works">
+          <span>Religious Affections (종교적 정서론)</span>
+          <span>Freedom of the Will (의지의 자유)</span>
+          <span>Selected Sermons (설교 선집)</span>
+          <span>Original Sin (원죄론)</span>
+          <span>Life of Brainerd (브레이너드의 생애)</span>
+        </div>
+      </div>
+      <div class="card done">
+        <div class="card-name">존 웨슬리</div>
+        <div class="card-years">1703–1791</div>
+        <div class="card-desc">성화론, 감리교 신학, 완전 성화</div>
+        <div class="card-stat">5권 / 2,126 청크</div>
+        <div class="card-works">
+          <span>Sermons on Several Occasions (설교집)</span>
+          <span>A Plain Account of Christian Perfection (완전 성화)</span>
+          <span>Journal Vol.1 (일지)</span>
+          <span>Sermons Vol.2 (설교집 2)</span>
+          <span>An Earnest Appeal (진지한 호소)</span>
+        </div>
+      </div>
+      <div class="card done">
+        <div class="card-name">조지 휫필드</div>
+        <div class="card-years">1714–1770</div>
+        <div class="card-desc">대각성 운동 설교자, 야외 설교</div>
+        <div class="card-stat">5권 / 9,934 청크</div>
+        <div class="card-works">
+          <span>Works Vol.1 — Journals (일지)</span>
+          <span>Works Vol.2-3 — Letters & Journals (서신 및 일지)</span>
+          <span>Works Vol.4-5 — Sermons & Tracts (설교 및 소책자)</span>
+        </div>
+      </div>
+      <div class="card done">
+        <div class="card-name">앤드루 머레이</div>
+        <div class="card-years">1828–1917</div>
+        <div class="card-desc">기도 신학, 겸손, 경건 문학</div>
+        <div class="card-stat">3권 / 1,095 청크</div>
+        <div class="card-works">
+          <span>Lord, Teach Us to Pray (주여, 기도를 가르쳐 주소서)</span>
+          <span>Humility (겸손: 거룩함의 아름다움)</span>
+          <span>The Ministry of Intercession (중보 기도의 사역)</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="era">
+    <div class="era-header">
+      <div class="era-dot" style="background:var(--era-liberal)"></div>
+      <span class="era-title">자유주의 신학 / 19세기</span>
+      <span class="era-period">18~19세기</span>
+    </div>
+    <div class="theologians">
+      <div class="card">
+        <div class="card-name">프리드리히 슐라이어마허</div>
+        <div class="card-years">1768–1834</div>
+        <div class="card-desc">근대 신학의 아버지, 감정의 신학</div>
+      </div>
+      <div class="card">
+        <div class="card-name">알브레히트 리츨</div>
+        <div class="card-years">1822–1889</div>
+        <div class="card-desc">도덕적 가치판단, 하나님 나라</div>
+      </div>
+      <div class="card">
+        <div class="card-name">아브라함 카이퍼</div>
+        <div class="card-years">1837–1920</div>
+        <div class="card-desc">신칼뱅주의, 영역 주권</div>
+      </div>
+      <div class="card">
+        <div class="card-name">아돌프 폰 하르낙</div>
+        <div class="card-years">1851–1930</div>
+        <div class="card-desc">교리사, 기독교의 본질</div>
+      </div>
+      <div class="card">
+        <div class="card-name">헤르만 바빙크</div>
+        <div class="card-years">1854–1921</div>
+        <div class="card-desc">개혁교의학, 개혁파 조직신학 집대성</div>
+      </div>
+      <div class="card">
+        <div class="card-name">알베르트 슈바이처</div>
+        <div class="card-years">1875–1965</div>
+        <div class="card-desc">역사적 예수 탐구, 종말론적 예수</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="era">
+    <div class="era-header">
+      <div class="era-dot" style="background:var(--era-neoorthodox)"></div>
+      <span class="era-title">신정통주의 / 변증법 신학</span>
+      <span class="era-period">20세기 초~중반</span>
+    </div>
+    <div class="theologians">
+      <div class="card">
+        <div class="card-name">칼 바르트</div>
+        <div class="card-years">1886–1968</div>
+        <div class="card-desc">교회교의학, 하나님의 말씀의 신학</div>
+      </div>
+      <div class="card">
+        <div class="card-name">에밀 브루너</div>
+        <div class="card-years">1889–1966</div>
+        <div class="card-desc">자연신학 논쟁, 만남의 신학</div>
+      </div>
+      <div class="card">
+        <div class="card-name">루돌프 불트만</div>
+        <div class="card-years">1884–1976</div>
+        <div class="card-desc">비신화화, 실존론적 해석</div>
+      </div>
+      <div class="card">
+        <div class="card-name">앙리 드 뤼박</div>
+        <div class="card-years">1896–1991</div>
+        <div class="card-desc">자연과 은총, 누벨 테올로지</div>
+      </div>
+      <div class="card">
+        <div class="card-name">게르하르트 폰 라트</div>
+        <div class="card-years">1901–1971</div>
+        <div class="card-desc">구약신학, 전승사</div>
+      </div>
+      <div class="card">
+        <div class="card-name">오스카 쿨만</div>
+        <div class="card-years">1902–1999</div>
+        <div class="card-desc">구원사 신학, 그리스도와 시간</div>
+      </div>
+      <div class="card">
+        <div class="card-name">디트리히 본회퍼</div>
+        <div class="card-years">1906–1945</div>
+        <div class="card-desc">제자도의 비용, 비종교적 기독교</div>
+      </div>
+      <div class="card">
+        <div class="card-name">파울 틸리히</div>
+        <div class="card-years">1886–1965</div>
+        <div class="card-desc">상관관계의 방법, 존재의 용기</div>
+      </div>
+      <div class="card">
+        <div class="card-name">라인홀드 니버</div>
+        <div class="card-years">1892–1971</div>
+        <div class="card-desc">기독교 현실주의, 사회윤리</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="era">
+    <div class="era-header">
+      <div class="era-dot" style="background:var(--era-modern)"></div>
+      <span class="era-title">현대 신학</span>
+      <span class="era-period">20세기 후반~</span>
+    </div>
+    <div class="theologians">
+      <div class="card">
+        <div class="card-name">이브 콩가르</div>
+        <div class="card-years">1904–1995</div>
+        <div class="card-desc">교회론, 평신도 신학, 성령론</div>
+      </div>
+      <div class="card">
+        <div class="card-name">칼 라너</div>
+        <div class="card-years">1904–1984</div>
+        <div class="card-desc">초월적 신학, 익명의 그리스도인</div>
+      </div>
+      <div class="card">
+        <div class="card-name">에드워드 쉴레벡스</div>
+        <div class="card-years">1914–2009</div>
+        <div class="card-desc">그리스도론, 성사 신학, 도미니코회</div>
+      </div>
+      <div class="card">
+        <div class="card-name">한스 큉</div>
+        <div class="card-years">1928–2021</div>
+        <div class="card-desc">에큐메니컬, 세계윤리</div>
+      </div>
+      <div class="card">
+        <div class="card-name">볼프하르트 판넨베르크</div>
+        <div class="card-years">1928–2014</div>
+        <div class="card-desc">역사와 계시, 조직신학</div>
+      </div>
+      <div class="card done">
+        <div class="card-name">위르겐 몰트만</div>
+        <div class="card-years">1926–2024</div>
+        <div class="card-desc">희망의 신학, 십자가의 신학</div>
+        <div class="card-stat">18권 / 12,114 청크</div>
+        <div class="card-works">
+          <span>희망의 신학 · 십자가에 달리신 하나님</span>
+          <span>창조 안에 계신 하나님 · 예수 그리스도의 길</span>
+          <span>생명의 영 · 성령의 능력 안에 있는 교회</span>
+          <span>삼위일체와 하나님의 나라 · 삼위일체와 하나님의 역사</span>
+          <span>오시는 하나님 · 정치신학 정치윤리</span>
+          <span>희망의 윤리 · 몰트만 자서전 외 6권</span>
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-name">요제프 라칭거</div>
+        <div class="card-years">1927–2022</div>
+        <div class="card-desc">기독교 신앙 입문, 교황 베네딕토 16세</div>
+      </div>
+      <div class="card">
+        <div class="card-name">스탠리 하우어워스</div>
+        <div class="card-years">1940–</div>
+        <div class="card-desc">덕 윤리, 교회 공동체, 평화주의</div>
+      </div>
+      <div class="card">
+        <div class="card-name">N.T. 라이트</div>
+        <div class="card-years">1948–</div>
+        <div class="card-desc">바울에 대한 새 관점, 부활 연구</div>
+      </div>
+      <div class="card">
+        <div class="card-name">팀 켈러</div>
+        <div class="card-years">1950–2023</div>
+        <div class="card-desc">도시 목회 신학, 변증, 리디머 장로교회</div>
+      </div>
+      <div class="card">
+        <div class="card-name">메리 캐서린 힐커트</div>
+        <div class="card-years">1951–</div>
+        <div class="card-desc">설교 신학, 은총의 명명, 도미니코회</div>
+      </div>
+      <div class="card">
+        <div class="card-name">미로슬라프 볼프</div>
+        <div class="card-years">1956–</div>
+        <div class="card-desc">배제와 포용, 삼위일체와 공동체</div>
+      </div>
+    </div>
+  </div>
+
+</section>
+
+<!-- 신앙고백서 섹션 -->
+<section class="timeline">
+  <div style="text-align:center; padding:2rem 0 1rem;">
+    <h2 style="font-size:1.5rem; font-weight:300; color:var(--gold); letter-spacing:0.1em;">신앙고백서</h2>
+    <p style="color:var(--text-muted); font-size:0.9rem; margin-top:0.5rem;">교회가 함께 고백한 신앙의 문서들</p>
+  </div>
+
+  <div class="era">
+    <div class="era-header">
+      <div class="era-dot" style="background:var(--era-patristic)"></div>
+      <span class="era-title">고대 공의회 신조</span>
+      <span class="era-period">1~5세기</span>
+    </div>
+    <div class="theologians">
+      <div class="card"><div class="card-name">디다케</div><div class="card-years">~1세기</div><div class="card-desc">현존하는 가장 오래된 교회 교훈서</div></div>
+      <div class="card"><div class="card-name">사도신경</div><div class="card-years">~2세기</div><div class="card-desc">세례 신앙고백</div></div>
+      <div class="card"><div class="card-name">니케아 신경</div><div class="card-years">325</div><div class="card-desc">삼위일체 정의</div></div>
+      <div class="card"><div class="card-name">니케아-콘스탄티노플 신경</div><div class="card-years">381</div><div class="card-desc">성령론 확장</div></div>
+      <div class="card"><div class="card-name">아타나시우스 신경</div><div class="card-years">~5세기</div><div class="card-desc">삼위일체 상세 교리</div></div>
+      <div class="card"><div class="card-name">칼케돈 신조</div><div class="card-years">451</div><div class="card-desc">그리스도 양성론</div></div>
+    </div>
+  </div>
+
+  <div class="era">
+    <div class="era-header">
+      <div class="era-dot" style="background:var(--era-reformation)"></div>
+      <span class="era-title">종교개혁</span>
+      <span class="era-period">16세기</span>
+    </div>
+    <div class="theologians">
+      <div class="card"><div class="card-name">루터 소교리문답</div><div class="card-years">1529</div><div class="card-desc">평신도용 교리교육</div></div>
+      <div class="card"><div class="card-name">아우크스부르크 신앙고백</div><div class="card-years">1530</div><div class="card-desc">루터파 기본 고백</div></div>
+      <div class="card"><div class="card-name">아우크스부르크 변증론</div><div class="card-years">1531</div><div class="card-desc">멜란히톤의 변증</div></div>
+      <div class="card"><div class="card-name">슈말칼덴 조항</div><div class="card-years">1537</div><div class="card-desc">로마 교회와의 차이</div></div>
+      <div class="card"><div class="card-name">제1 스위스 신앙고백</div><div class="card-years">1536</div><div class="card-desc">취리히 개혁파</div></div>
+      <div class="card"><div class="card-name">제네바 교리문답</div><div class="card-years">1542</div><div class="card-desc">칼뱅</div></div>
+      <div class="card"><div class="card-name">갈리아 신앙고백</div><div class="card-years">1559</div><div class="card-desc">프랑스 개혁파</div></div>
+      <div class="card"><div class="card-name">스코틀랜드 신앙고백</div><div class="card-years">1560</div><div class="card-desc">존 녹스</div></div>
+      <div class="card"><div class="card-name">벨직 신앙고백</div><div class="card-years">1561</div><div class="card-desc">네덜란드 개혁파</div></div>
+      <div class="card"><div class="card-name">하이델베르크 교리문답</div><div class="card-years">1563</div><div class="card-desc">독일 개혁파</div></div>
+      <div class="card"><div class="card-name">제2 스위스 신앙고백</div><div class="card-years">1566</div><div class="card-desc">불링거</div></div>
+      <div class="card"><div class="card-name">39개 신앙조항</div><div class="card-years">1571</div><div class="card-desc">영국 성공회</div></div>
+      <div class="card"><div class="card-name">일치신조</div><div class="card-years">1577</div><div class="card-desc">루터파 내부 논쟁 정리</div></div>
+      <div class="card"><div class="card-name">협화신조서</div><div class="card-years">1580</div><div class="card-desc">루터파 고백서 전체 모음</div></div>
+    </div>
+  </div>
+
+  <div class="era">
+    <div class="era-header">
+      <div class="era-dot" style="background:var(--era-pietism)"></div>
+      <span class="era-title">개혁파 정통 / 감리교</span>
+      <span class="era-period">17~18세기</span>
+    </div>
+    <div class="theologians">
+      <div class="card"><div class="card-name">도르트 신조</div><div class="card-years">1619</div><div class="card-desc">5대 교리 (TULIP)</div></div>
+      <div class="card"><div class="card-name">웨스트민스터 신앙고백</div><div class="card-years">1646</div><div class="card-desc">장로교 기본 고백</div></div>
+      <div class="card"><div class="card-name">웨스트민스터 대요리 문답</div><div class="card-years">1647</div><div class="card-desc">교리 상세</div></div>
+      <div class="card"><div class="card-name">웨스트민스터 소요리 문답</div><div class="card-years">1647</div><div class="card-desc">교리 요약</div></div>
+      <div class="card"><div class="card-name">사보이 선언</div><div class="card-years">1658</div><div class="card-desc">회중교회</div></div>
+      <div class="card"><div class="card-name">제2 런던 침례교 신앙고백</div><div class="card-years">1689</div><div class="card-desc">침례교</div></div>
+      <div class="card"><div class="card-name">감리교 25개 신앙조항</div><div class="card-years">1784</div><div class="card-desc">웨슬리</div></div>
+    </div>
+  </div>
+
+  <div class="era">
+    <div class="era-header">
+      <div class="era-dot" style="background:var(--era-modern)"></div>
+      <span class="era-title">근현대</span>
+      <span class="era-period">20세기</span>
+    </div>
+    <div class="theologians">
+      <div class="card"><div class="card-name">바르멘 선언</div><div class="card-years">1934</div><div class="card-desc">바르트, 나치 저항</div></div>
+      <div class="card"><div class="card-name">제2차 바티칸 공의회 문헌</div><div class="card-years">1962–1965</div><div class="card-desc">교회헌장, 계시헌장, 전례헌장</div></div>
+      <div class="card"><div class="card-name">로잔 언약</div><div class="card-years">1974</div><div class="card-desc">복음주의 선교 헌장</div></div>
+      <div class="card"><div class="card-name">벨하르 신앙고백</div><div class="card-years">1982</div><div class="card-desc">남아공, 인종차별 저항</div></div>
+    </div>
+  </div>
+</section>
+
+<section class="vision">
+  <h2>VISION</h2>
+  <p>
+    Symposium은 2천 년 기독교 신학의 지적 유산을 하나의 플랫폼에 모읍니다.
+    교부들의 신앙고백부터 현대 신학자들의 비판적 성찰까지,
+    신학자들의 원문에 근거한 대화를 가능하게 합니다.
+    마치 플라톤의 향연처럼, 시대를 초월한 신학적 대화의 자리를 만들어갑니다.
+  </p>
+</section>
+
+<footer class="footer">
+  <p>Symposium Project</p>
+  <p style="margin-top:0.5rem"><a href="/">질의응답 바로가기</a></p>
+</footer>
+
+</body>
+</html>

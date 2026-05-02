@@ -19,18 +19,51 @@ function renderTopics() {
   `).join("");
 }
 
+const ERA_GROUPS = [
+  { label: "교부 시대",           color: "#c084fc", min: 0,    max: 499  },
+  { label: "중세 초기",           color: "#a78bfa", min: 500,  max: 999  },
+  { label: "중세",              color: "#818cf8", min: 1000, max: 1479 },
+  { label: "종교개혁",            color: "#f97316", min: 1480, max: 1599 },
+  { label: "경건주의 / 부흥운동",   color: "#fb923c", min: 1600, max: 1799 },
+  { label: "현대",              color: "#6b8afd", min: 1800, max: 9999 },
+];
+
+function getEra(born) {
+  return ERA_GROUPS.find(e => born >= e.min && born <= e.max) || ERA_GROUPS[ERA_GROUPS.length - 1];
+}
+
 async function renderTheologians() {
   const grid = document.getElementById("theologianGrid");
   if (!grid) return;
   try {
     const res = await fetch("/api/authors");
     const authors = await res.json();
-    grid.innerHTML = authors.map(a => `
-      <a href="/symposium?invite=${encodeURIComponent(a.key)}" class="theologian-card theologian-card-link">
-        <div class="theologian-name">${a.name_ko}</div>
-        <div class="theologian-works">${a.work_count}권</div>
-      </a>
-    `).join("");
+
+    const groups = new Map();
+    for (const a of authors) {
+      const era = getEra(a.born);
+      if (!groups.has(era.label)) groups.set(era.label, { era, authors: [] });
+      groups.get(era.label).authors.push(a);
+    }
+
+    let html = "";
+    for (const { era, authors: eraAuthors } of groups.values()) {
+      html += `<div class="landing-era-group">
+        <div class="landing-era-header">
+          <span class="era-group-dot" style="background:${era.color}"></span>
+          <span class="landing-era-label">${era.label}</span>
+        </div>
+        <div class="theologian-grid">`;
+      for (const a of eraAuthors) {
+        html += `
+          <a href="/symposium?invite=${encodeURIComponent(a.key)}" class="theologian-card theologian-card-link">
+            <div class="theologian-name">${a.name_ko}</div>
+            <div class="theologian-works">${a.work_count}권</div>
+          </a>`;
+      }
+      html += `</div></div>`;
+    }
+    grid.innerHTML = html;
   } catch (e) {
     grid.innerHTML = '<p class="dim">신학자 목록을 불러올 수 없습니다.</p>';
   }

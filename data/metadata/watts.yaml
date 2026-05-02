@@ -1,0 +1,13 @@
+author:
+  key: watts
+  name_ko: 아이작 왓츠
+  name_en: Isaac Watts
+  born: 1674
+  tradition: 회중교회
+works:
+- file: hymns_spiritual_songs.txt
+  title: Hymns and Spiritual Songs (찬송과 영적 노래)
+  year: 1707
+- file: psalms_of_david.txt
+  title: The Psalms of David (다윗의 시편)
+  year: 1719

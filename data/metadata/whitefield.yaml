@@ -15,3 +15,18 @@ works:
   year: 1771
   gutenberg_id: 73267
   description: "Sermons and tracts, with select collection of letters"
+- file: works_vol2.txt
+  title: "Works Vol.2 — Letters & Journals (서신 및 일지 2)"
+  year: 1771
+  gutenberg_id: 71140
+  description: "Letters and journals, continued from Vol. 1"
+- file: works_vol3.txt
+  title: "Works Vol.3 — Letters & Journals (서신 및 일지 3)"
+  year: 1771
+  gutenberg_id: 73012
+  description: "Letters and journals, continued from Vol. 2"
+- file: works_vol5.txt
+  title: "Works Vol.5 — Sermons & Tracts (설교 및 소책자)"
+  year: 1771
+  gutenberg_id: 77034
+  description: "Sermons and tracts, continued from Vol. 4"
