@@ -26,10 +26,10 @@ async function renderTheologians() {
     const res = await fetch("/api/authors");
     const authors = await res.json();
     grid.innerHTML = authors.map(a => `
-      <div class="theologian-card">
+      <a href="/symposium?invite=${encodeURIComponent(a.key)}" class="theologian-card theologian-card-link">
         <div class="theologian-name">${a.name_ko}</div>
         <div class="theologian-works">${a.work_count}권</div>
-      </div>
+      </a>
     `).join("");
   } catch (e) {
     grid.innerHTML = '<p class="dim">신학자 목록을 불러올 수 없습니다.</p>';

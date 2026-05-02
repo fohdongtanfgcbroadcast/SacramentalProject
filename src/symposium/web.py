@@ -5,6 +5,7 @@ import asyncio
 import json
 import subprocess
 import unicodedata
+from functools import lru_cache
 from pathlib import Path
 
 from fastapi import FastAPI, HTTPException
@@ -31,8 +32,10 @@ SYSTEM_INSTRUCTION = (
     "아래 참고 자료에 근거해 질문에 답하세요. "
     "각 주장 뒤에 출처를 [저작명, p.페이지] 형식으로 표기하고, "
     "중요한 신학 용어는 원어(독일어/영어/라틴어)를 병기하세요. "
-    "자료에 직접 언급되지 않은 내용은 '자료에는 직접 언급되지 않음'이라고 명시하세요. "
-    "마크다운 서식(#, **, *, - 등)을 사용하지 말고 일반 텍스트로만 답변하세요."
+    "아래 용어집이 제공된 경우, 해당 용어의 한국어 번역을 반드시 따르세요. "
+    "마크다운 서식(#, **, *, - 등)을 사용하지 말고 일반 텍스트로만 답변하세요. "
+    "'자료에는 직접 언급되지 않음', '제공된 자료에서', '~임을 밝힙니다' 등 "
+    "메타 발언이나 면책 문구는 사용하지 마세요."
 )
 
 THEOLOGIAN_SYSTEM_TEMPLATE = (
@@ -41,8 +44,13 @@ THEOLOGIAN_SYSTEM_TEMPLATE = (
     "이전 대화 맥락을 참고하되, 다른 신학자의 견해에 동의하거나 반박할 수 있습니다. "
     "각 주장 뒤에 출처를 [저작명, p.페이지] 형식으로 표기하세요. "
     "중요한 신학 용어는 원어(독일어/영어/라틴어/그리스어)를 병기하세요. "
-    "자료에 직접 언급되지 않은 내용은 '자료에는 직접 언급되지 않음'이라고 명시하세요. "
-    "마크다운 서식(#, **, *, - 등)을 사용하지 말고 일반 텍스트로만 답변하세요."
+    "아래 용어집이 제공된 경우, 해당 용어의 한국어 번역을 반드시 따르세요. "
+    "마크다운 서식(#, **, *, - 등)을 사용하지 말고 일반 텍스트로만 답변하세요. "
+    "절대 금지 표현: '자료에는 직접 언급되지 않음', '제공된 자료에서', "
+    "'~임을 밝힙니다', '후대 신학에서 더 정교하게 전개된', "
+    "'자료의 신학적 원리들로부터 도출한' 등 메타 발언이나 면책 문구를 쓰지 마세요. "
+    "당신은 실제 신학자입니다. 자료 제공 여부를 언급하지 말고, "
+    "자신의 신학적 견해로서 자연스럽게 답변하세요."
 )
 
 
@@ -80,6 +88,48 @@ class SymposiumDirectRequest(BaseModel):
     target: str
 
 
+# --- Glossary ---
+
+@lru_cache(maxsize=1)
+def _load_glossary() -> list[dict]:
+    """Theology_export_word.json 로드 (서버 시작 시 1회)."""
+    path = PROJECT_ROOT / "Theology_export_word.json"
+    if not path.exists():
+        return []
+    with open(path, encoding="utf-8") as f:
+        return json.load(f)
+
+
+def _find_relevant_terms(text: str, max_terms: int = 30) -> list[dict]:
+    """텍스트에서 매칭되는 신학 용어를 추출. 영어·한국어 양방향 검색."""
+    glossary = _load_glossary()
+    if not glossary:
+        return []
+    text_lower = text.lower()
+    matched = []
+    for entry in glossary:
+        eng = entry.get("english", "")
+        kor = entry.get("korean", "")
+        if len(eng) < 3:
+            continue
+        if eng.lower() in text_lower or kor in text:
+            matched.append(entry)
+            if len(matched) >= max_terms:
+                break
+    return matched
+
+
+def _format_glossary_section(terms: list[dict]) -> str:
+    """용어집을 프롬프트 텍스트로 포맷."""
+    if not terms:
+        return ""
+    lines = ["# 용어집 (아래 번역을 따르세요)", ""]
+    for t in terms:
+        lines.append(f"- {t['english']} → {t['korean']}")
+    lines.append("")
+    return "\n".join(lines)
+
+
 # --- Helpers ---
 
 def _get_available_authors() -> list[AuthorInfo]:
@@ -102,7 +152,14 @@ def _get_available_authors() -> list[AuthorInfo]:
 
 def _build_context(question: str, hits: list[dict]) -> str:
     """검색 결과를 claude CLI에 전달할 프롬프트로 조합."""
-    parts = [SYSTEM_INSTRUCTION, "", "# 참고 자료", ""]
+    hit_texts = " ".join(h["text"][:200] for h in hits)
+    terms = _find_relevant_terms(question + " " + hit_texts)
+    glossary = _format_glossary_section(terms)
+
+    parts = [SYSTEM_INSTRUCTION, ""]
+    if glossary:
+        parts.append(glossary)
+    parts.extend(["# 참고 자료", ""])
     for i, hit in enumerate(hits, 1):
         m = hit["metadata"]
         source = f"[{m.get('title', '?')}, p.{m.get('page', '?')}]"
@@ -139,7 +196,14 @@ def _build_theologian_prompt(
         name_ko=author_meta["name_ko"],
         tradition=author_meta.get("tradition", ""),
     )
-    parts = [system, "", "# 참고 자료 (본인 저작에서 발췌)", ""]
+    hit_texts = " ".join(h["text"][:200] for h in hits)
+    terms = _find_relevant_terms(question + " " + hit_texts)
+    glossary = _format_glossary_section(terms)
+
+    parts = [system, ""]
+    if glossary:
+        parts.append(glossary)
+    parts.extend(["# 참고 자료 (본인 저작에서 발췌)", ""])
     for i, hit in enumerate(hits, 1):
         m = hit["metadata"]
         source = f"[{m.get('title', '?')}, p.{m.get('page', '?')}]"

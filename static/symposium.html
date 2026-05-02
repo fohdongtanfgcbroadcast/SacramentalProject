@@ -32,12 +32,15 @@
     <!-- 추천 질문 -->
     <div id="recommendations" class="recommendations hidden"></div>
 
+    <!-- 발언자 선택 (좌장 모드) -->
+    <div id="speakerPicker" class="speaker-picker hidden">
+      <span class="picker-label" id="pickerLabel">누가 먼저 답할까요?</span>
+      <div id="pickerButtons" class="picker-buttons"></div>
+    </div>
+
     <!-- 입력 -->
     <form id="chatForm" class="chat-input-form hidden">
       <div class="chat-input-row">
-        <select id="targetSelect" class="target-select">
-          <option value="">전체 라운드</option>
-        </select>
         <input type="text" id="chatInput" placeholder="질문을 입력하세요..." required>
         <button type="submit" class="btn btn-primary">보내기</button>
       </div>

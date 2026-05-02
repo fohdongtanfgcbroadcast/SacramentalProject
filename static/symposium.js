@@ -1,11 +1,13 @@
 // --- State ---
 let sessionId = null;
 let selectedTheologians = [];
+let sessionTheologians = []; // {key, name_ko, ...} from /api/symposium/start
 let allAuthors = [];
 let isWaiting = false;
+let currentQuestion = "";
+let spokenInRound = new Set(); // 이번 라운드에서 발언한 신학자
 
 // --- DOM ---
-const panel = document.getElementById("panel");
 const theologianList = document.getElementById("theologianList");
 const selectedCount = document.getElementById("selectedCount");
 const btnStart = document.getElementById("btnStart");
@@ -13,11 +15,14 @@ const chatMessages = document.getElementById("chatMessages");
 const recommendations = document.getElementById("recommendations");
 const chatForm = document.getElementById("chatForm");
 const chatInput = document.getElementById("chatInput");
-const targetSelect = document.getElementById("targetSelect");
+const speakerPicker = document.getElementById("speakerPicker");
+const pickerLabel = document.getElementById("pickerLabel");
+const pickerButtons = document.getElementById("pickerButtons");
 
 // --- URL params ---
 const urlParams = new URLSearchParams(window.location.search);
 const topicParam = urlParams.get("topic") || "";
+const inviteParams = urlParams.getAll("invite");
 
 // --- Init ---
 async function init() {
@@ -25,6 +30,16 @@ async function init() {
     const res = await fetch("/api/authors");
     allAuthors = await res.json();
     renderTheologianList();
+    // URL에서 invite 파라미터로 미리 선택
+    if (inviteParams.length > 0) {
+      inviteParams.forEach(key => {
+        const cb = theologianList.querySelector(`input[value="${key}"]`);
+        if (cb && !cb.checked) {
+          cb.checked = true;
+          cb.dispatchEvent(new Event("change"));
+        }
+      });
+    }
   } catch (e) {
     theologianList.innerHTML = '<p class="dim">불러오기 실패</p>';
   }
@@ -48,7 +63,6 @@ function onSelectionChange() {
   const checked = theologianList.querySelectorAll('input:checked');
   selectedTheologians = Array.from(checked).map(cb => cb.value);
 
-  // 5명 초과 방지
   if (selectedTheologians.length > 5) {
     this.checked = false;
     selectedTheologians = selectedTheologians.filter(k => k !== this.value);
@@ -75,14 +89,11 @@ btnStart.addEventListener("click", async () => {
     const data = await res.json();
 
     sessionId = data.session_id;
+    sessionTheologians = data.theologians;
 
     // 체크박스 비활성화
     theologianList.querySelectorAll('input[type="checkbox"]').forEach(cb => { cb.disabled = true; });
     btnStart.classList.add("hidden");
-
-    // 대상 셀렉트 채우기
-    targetSelect.innerHTML = '<option value="">전체 라운드</option>' +
-      data.theologians.map(t => `<option value="${t.key}">${t.name_ko}</option>`).join("");
 
     // 추천 질문 표시
     if (data.recommended_questions.length > 0) {
@@ -103,7 +114,7 @@ btnStart.addEventListener("click", async () => {
 
     // 채팅 영역 초기화
     chatMessages.innerHTML = "";
-    addSystemMessage("향연이 시작되었습니다. 질문을 입력하세요.");
+    addSystemMessage("향연이 시작되었습니다. 좌장으로서 질문을 입력하고, 발언자를 지명하세요.");
     chatForm.classList.remove("hidden");
     chatInput.focus();
   } catch (e) {
@@ -113,109 +124,92 @@ btnStart.addEventListener("click", async () => {
   }
 });
 
-// --- Send message ---
-chatForm.addEventListener("submit", async (e) => {
+// --- Send message (질문 입력) ---
+chatForm.addEventListener("submit", (e) => {
   e.preventDefault();
   const message = chatInput.value.trim();
   if (!message || !sessionId || isWaiting) return;
 
-  const target = targetSelect.value;
   chatInput.value = "";
   recommendations.classList.add("hidden");
-  addUserMessage(message);
+  currentQuestion = message;
+  spokenInRound = new Set();
 
-  if (target) {
-    await sendDirect(message, target);
-  } else {
-    await sendRound(message);
-  }
+  addUserMessage(message);
+  showSpeakerPicker();
 });
 
-// --- Round (SSE) ---
-async function sendRound(message) {
-  isWaiting = true;
-  setInputEnabled(false);
+// --- Speaker Picker (좌장 모드) ---
+function showSpeakerPicker() {
+  const remaining = sessionTheologians.filter(t => !spokenInRound.has(t.key));
 
-  // 첫 번째 신학자 대기 표시
-  addWaitingMessage(selectedTheologians[0]);
-
-  try {
-    const res = await fetch("/api/symposium/ask", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ session_id: sessionId, message }),
-    });
-
-    if (!res.ok) throw new Error(await res.text());
-
-    const reader = res.body.getReader();
-    const decoder = new TextDecoder();
-    let buffer = "";
-    let theologianIndex = 0;
-
-    while (true) {
-      const { done, value } = await reader.read();
-      if (done) break;
-
-      buffer += decoder.decode(value, { stream: true });
-      const lines = buffer.split("\n");
-      buffer = lines.pop();
-
-      for (const line of lines) {
-        if (line.startsWith("data:")) {
-          const jsonStr = line.slice(5).trim();
-          if (!jsonStr) continue;
-          try {
-            const data = JSON.parse(jsonStr);
-            if (data.done) continue;
-
-            // 대기 메시지 제거, 답변 표시
-            removeWaiting();
-            addTheologianMessage(data);
-
-            // 다음 신학자 대기 표시
-            theologianIndex++;
-            if (theologianIndex < selectedTheologians.length) {
-              addWaitingMessage(selectedTheologians[theologianIndex]);
-            }
-          } catch (parseErr) { /* skip */ }
-        }
-      }
-    }
-  } catch (e) {
-    removeWaiting();
-    addSystemMessage("오류: " + e.message);
+  if (remaining.length === 0) {
+    // 모든 신학자가 발언 완료
+    hideSpeakerPicker();
+    addSystemMessage("이번 라운드가 완료되었습니다. 새 질문을 입력하세요.");
+    setInputEnabled(true);
+    chatInput.focus();
+    return;
   }
 
-  isWaiting = false;
-  setInputEnabled(true);
-  chatInput.focus();
+  const isFirst = spokenInRound.size === 0;
+  pickerLabel.textContent = isFirst ? "누가 먼저 답할까요?" : "다음 발언자를 선택하세요";
+
+  pickerButtons.innerHTML = remaining.map(t => `
+    <button type="button" class="picker-btn" data-key="${t.key}" data-name="${escapeAttr(t.name_ko)}">
+      ${escapeHtml(t.name_ko)}
+    </button>
+  `).join("") + (spokenInRound.size > 0 ? `
+    <button type="button" class="picker-btn picker-btn-skip">라운드 종료</button>
+  ` : "");
+
+  pickerButtons.querySelectorAll(".picker-btn").forEach(btn => {
+    btn.addEventListener("click", () => {
+      if (btn.classList.contains("picker-btn-skip")) {
+        hideSpeakerPicker();
+        addSystemMessage("라운드를 종료합니다. 새 질문을 입력하세요.");
+        setInputEnabled(true);
+        chatInput.focus();
+        return;
+      }
+      const key = btn.dataset.key;
+      hideSpeakerPicker();
+      callTheologian(key);
+    });
+  });
+
+  speakerPicker.classList.remove("hidden");
+  setInputEnabled(false);
+  scrollToBottom();
 }
 
-// --- Direct ---
-async function sendDirect(message, target) {
+function hideSpeakerPicker() {
+  speakerPicker.classList.add("hidden");
+}
+
+// --- Call theologian (direct) ---
+async function callTheologian(authorKey) {
   isWaiting = true;
-  setInputEnabled(false);
-  addWaitingMessage(target);
+  addWaitingMessage(authorKey);
 
   try {
     const res = await fetch("/api/symposium/direct", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ session_id: sessionId, message, target }),
+      body: JSON.stringify({ session_id: sessionId, message: currentQuestion, target: authorKey }),
     });
     if (!res.ok) throw new Error(await res.text());
     const data = await res.json();
     removeWaiting();
     addTheologianMessage(data);
+    spokenInRound.add(authorKey);
   } catch (e) {
     removeWaiting();
     addSystemMessage("오류: " + e.message);
   }
 
   isWaiting = false;
-  setInputEnabled(true);
-  chatInput.focus();
+  showSpeakerPicker();
 }
 
 // --- DOM Helpers ---
@@ -243,7 +237,6 @@ function addTheologianMessage(data) {
   div.appendChild(header);
   div.appendChild(body);
 
-  // 출처 (접기)
   if (data.sources && data.sources.length > 0) {
     const details = document.createElement("details");
     details.className = "chat-sources";
@@ -259,15 +252,14 @@ function addTheologianMessage(data) {
 }
 
 function addWaitingMessage(authorKey) {
-  const author = allAuthors.find(a => a.key === authorKey);
-  const name = author ? author.name_ko : authorKey;
+  const t = sessionTheologians.find(a => a.key === authorKey);
+  const name = t ? t.name_ko : authorKey;
   const div = document.createElement("div");
   div.className = "chat-msg chat-msg-waiting";
   div.id = "waiting-indicator";
   div.innerHTML = `<span class="waiting-dots"></span> ${escapeHtml(name)}가 생각하고 있습니다...`;
   chatMessages.appendChild(div);
   scrollToBottom();
-  return div;
 }
 
 function removeWaiting() {
@@ -286,7 +278,6 @@ function addSystemMessage(text) {
 function setInputEnabled(enabled) {
   chatInput.disabled = !enabled;
   chatForm.querySelector("button").disabled = !enabled;
-  targetSelect.disabled = !enabled;
 }
 
 function scrollToBottom() {
