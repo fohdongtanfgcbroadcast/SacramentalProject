@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Symposium — 향연</title>
+<link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+
+<header class="symposium-header">
+  <a href="/" class="back-link">← 홈</a>
+  <h1>향연</h1>
+</header>
+
+<main class="symposium-layout">
+  <!-- 좌측: 신학자 선택 패널 -->
+  <aside id="panel" class="theologian-panel">
+    <h3>신학자 초대 <span id="selectedCount">(0/5)</span></h3>
+    <div id="theologianList" class="theologian-checklist"></div>
+    <button id="btnStart" class="btn btn-primary" disabled>향연 시작</button>
+  </aside>
+
+  <!-- 중앙: 대화 영역 -->
+  <section class="chat-area">
+    <div id="chatMessages" class="chat-messages">
+      <div class="chat-welcome">
+        <p>신학자를 최대 5명 선택하고 향연을 시작하세요.</p>
+      </div>
+    </div>
+
+    <!-- 추천 질문 -->
+    <div id="recommendations" class="recommendations hidden"></div>
+
+    <!-- 입력 -->
+    <form id="chatForm" class="chat-input-form hidden">
+      <div class="chat-input-row">
+        <select id="targetSelect" class="target-select">
+          <option value="">전체 라운드</option>
+        </select>
+        <input type="text" id="chatInput" placeholder="질문을 입력하세요..." required>
+        <button type="submit" class="btn btn-primary">보내기</button>
+      </div>
+    </form>
+  </section>
+</main>
+
+<script src="/static/symposium.js"></script>
+</body>
+</html>
