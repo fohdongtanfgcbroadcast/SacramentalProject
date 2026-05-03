@@ -29,12 +29,14 @@ let confessionsList = []; // 신앙고백서 개별 문서
 // --- Init ---
 async function init() {
   try {
-    const [authRes, confRes] = await Promise.all([
-      fetch("/api/authors"),
-      fetch("/api/confessions"),
-    ]);
-    allAuthors = await authRes.json();
-    confessionsList = await confRes.json();
+    const res = await fetch("/api/authors");
+    allAuthors = await res.json();
+    try {
+      const confRes = await fetch("/api/confessions");
+      confessionsList = await confRes.json();
+    } catch (e) {
+      confessionsList = [];
+    }
     renderTheologianList();
     // URL에서 invite 파라미터로 미리 선택
     if (inviteParams.length > 0) {
@@ -355,4 +357,8 @@ function escapeAttr(str) {
 }
 
 // --- Go ---
-init();
+if (document.readyState === "loading") {
+  document.addEventListener("DOMContentLoaded", init);
+} else {
+  init();
+}
