@@ -363,6 +363,32 @@ async def symposium_page():
     return FileResponse(str(STATIC_DIR / "symposium.html"))
 
 
+@app.get("/api/confession-text/{filename}")
+async def confession_text(filename: str):
+    """신앙고백서 전문 반환. 너무 길면 앞부분만."""
+    raw_path = PROJECT_ROOT / "data" / "raw" / "confessions" / filename
+    if not raw_path.exists():
+        raise HTTPException(404, f"{filename} 파일 없음")
+    content = raw_path.read_text(encoding="utf-8", errors="replace")
+    # HTML 파일이면 태그 제거
+    if filename.endswith(".html") or filename.endswith(".htm"):
+        from symposium.ingest import extract_text_file
+        content = extract_text_file(raw_path)
+    # 정제
+    from symposium.ingest import clean_text
+    content = clean_text(content)
+    # 10,000자 초과 시 잘라서 표시
+    truncated = len(content) > 10000
+    if truncated:
+        content = content[:10000]
+    return {
+        "filename": filename,
+        "text": content,
+        "truncated": truncated,
+        "total_length": len(content) if not truncated else raw_path.stat().st_size,
+    }
+
+
 @app.post("/api/symposium/start")
 async def symposium_start(req: SymposiumStartRequest):
     if len(req.theologians) > 5:

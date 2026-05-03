@@ -40,11 +40,12 @@ async function init() {
       confessionsList = [];
     }
     renderTheologianList();
-    // 신앙고백서 토론 모드
+    // 신앙고백서 토론 모드 — 전문 로드
     if (confessionParam) {
       const ctx = document.getElementById("confessionContext");
       ctx.innerHTML = `<span class="confession-context-label">토론 대상</span> <strong>${escapeHtml(confessionNameParam || confessionParam)}</strong>`;
       ctx.classList.remove("hidden");
+      loadConfessionText(confessionParam, confessionNameParam);
     }
     // URL에서 invite 파라미터로 미리 선택
     if (inviteParams.length > 0) {
@@ -362,6 +363,26 @@ function escapeHtml(str) {
   const div = document.createElement("div");
   div.textContent = str;
   return div.innerHTML;
+}
+
+async function loadConfessionText(filename, name) {
+  const welcome = chatMessages.querySelector(".chat-welcome");
+  if (welcome) welcome.innerHTML = `<p>${escapeHtml(name)} 전문을 불러오는 중...</p>`;
+  try {
+    const res = await fetch(`/api/confession-text/${encodeURIComponent(filename)}`);
+    if (!res.ok) throw new Error(await res.text());
+    const data = await res.json();
+    chatMessages.innerHTML = "";
+    const div = document.createElement("div");
+    div.className = "confession-fulltext";
+    div.innerHTML = `<div class="confession-fulltext-title">${escapeHtml(name)}</div>
+      <div class="confession-fulltext-body">${escapeHtml(data.text)}</div>
+      ${data.truncated ? '<div class="confession-truncated">전문이 너무 길어 일부만 표시합니다. 질문하시면 RAG 검색으로 관련 부분을 자동 추출합니다.</div>' : ''}`;
+    chatMessages.appendChild(div);
+    scrollToBottom();
+  } catch (e) {
+    if (welcome) welcome.innerHTML = `<p>전문을 불러올 수 없습니다.</p>`;
+  }
 }
 
 function escapeAttr(str) {
