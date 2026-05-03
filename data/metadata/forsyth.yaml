@@ -1,0 +1,13 @@
+author:
+  key: forsyth
+  name_ko: P.T. 포사이스
+  name_en: P.T. Forsyth
+  born: 1848
+  tradition: 회중교회/변증신학
+works:
+- file: person_place_jesus_christ.txt
+  title: "The Person and Place of Jesus Christ (예수 그리스도의 인격과 위치)"
+  year: 1909
+- file: positive_preaching.txt
+  title: "Positive Preaching and the Modern Mind (적극적 설교와 현대 정신)"
+  year: 1907

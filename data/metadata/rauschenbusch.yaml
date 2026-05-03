@@ -1,0 +1,13 @@
+author:
+  key: rauschenbusch
+  name_ko: 월터 라우센부시
+  name_en: Walter Rauschenbusch
+  born: 1861
+  tradition: 사회복음
+works:
+- file: christianity_social_crisis.txt
+  title: "Christianity and the Social Crisis (기독교와 사회적 위기)"
+  year: 1907
+- file: theology_social_gospel.txt
+  title: "A Theology for the Social Gospel (사회복음의 신학)"
+  year: 1917
