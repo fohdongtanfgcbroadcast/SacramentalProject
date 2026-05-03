@@ -5,35 +5,37 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Symposium — 신학의 향연</title>
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css">
-<link rel="stylesheet" href="/static/style.css?v=4">
+<link rel="stylesheet" href="/static/style.css?v=5">
 </head>
 <body>
 
-<header>
+<header class="hero-header">
   <h1>SYMPOSIUM</h1>
   <p class="subtitle">신학의 향연 — 2천 년 기독교 신학자들과의 대화</p>
+  <p class="hero-desc">플라톤의 향연에서 철학자들이 주제를 두고 대화하듯,<br>
+  신학자들을 원탁에 초대하고 질문을 던져보세요.</p>
+  <div class="hero-stats">
+    <div class="hero-stat"><span class="hero-stat-num" id="statTheologians">44</span><span class="hero-stat-label">신학자</span></div>
+    <div class="hero-stat"><span class="hero-stat-num" id="statWorks">246</span><span class="hero-stat-label">저작</span></div>
+    <div class="hero-stat"><span class="hero-stat-num" id="statConfessions">21</span><span class="hero-stat-label">신앙고백서</span></div>
+  </div>
+  <a href="/symposium" class="btn btn-primary btn-large">향연에 참여하기</a>
 </header>
 
 <main class="landing">
-  <section class="intro">
-    <p>플라톤의 향연에서 철학자들이 주제를 두고 대화하듯,<br>
-    신학자들을 원탁에 초대하고 질문을 던져보세요.</p>
-    <a href="/symposium" class="btn btn-primary btn-large">향연에 참여하기</a>
-  </section>
-
   <section class="topics-section">
-    <h2>주제별 탐구</h2>
+    <h2 class="section-title">주제별 탐구</h2>
     <div id="topicCards" class="topic-grid"></div>
   </section>
 
   <section class="theologians-section">
-    <h2>참여 가능한 신학자</h2>
+    <h2 class="section-title">참여 가능한 신학자</h2>
     <div id="theologianGrid"></div>
   </section>
 
   <section class="confessions-section">
-    <h2>신앙고백서 탐구</h2>
-    <div id="confessionCards" class="topic-grid"></div>
+    <h2 class="section-title">신앙고백서 탐구</h2>
+    <div id="confessionCards" class="confession-grid"></div>
   </section>
 </main>
 
@@ -41,6 +43,6 @@
   <p>Symposium Project — <a href="/masterplan">Masterplan</a></p>
 </footer>
 
-<script src="/static/app.js?v=2"></script>
+<script src="/static/app.js?v=3"></script>
 </body>
 </html>

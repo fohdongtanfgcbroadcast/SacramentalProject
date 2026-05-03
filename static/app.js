@@ -56,10 +56,14 @@ async function renderTheologians() {
         </div>
         <div class="theologian-grid">`;
       for (const a of eraAuthors) {
+        const initial = a.name_ko.charAt(0);
         html += `
           <a href="/symposium?invite=${encodeURIComponent(a.key)}" class="theologian-card theologian-card-link">
-            <div class="theologian-name">${a.name_ko}</div>
-            <div class="theologian-works">${a.tradition || ''}</div>
+            <div class="theologian-avatar" style="background:${era.color}22;color:${era.color}">${initial}</div>
+            <div class="theologian-info">
+              <div class="theologian-name">${a.name_ko}</div>
+              <div class="theologian-works">${a.tradition || ''}</div>
+            </div>
           </a>`;
       }
       html += `</div></div>`;
@@ -79,9 +83,10 @@ async function renderConfessions() {
     grid.innerHTML = confessions.map(c => {
       const shortTitle = c.title.split(" — ")[0];
       return `
-      <a href="/symposium?confession=${encodeURIComponent(c.file)}&confession_name=${encodeURIComponent(shortTitle)}" class="topic-card">
-        <div class="topic-name">${shortTitle}</div>
-        <div class="topic-desc">${c.tradition} · ${c.year}</div>
+      <a href="/symposium?confession=${encodeURIComponent(c.file)}&confession_name=${encodeURIComponent(shortTitle)}" class="confession-card">
+        <div class="confession-card-year">${c.year}</div>
+        <div class="confession-card-name">${shortTitle}</div>
+        <div class="confession-card-tradition">${c.tradition}</div>
       </a>`;
     }).join("");
   } catch (e) {

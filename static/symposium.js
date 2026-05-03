@@ -101,9 +101,11 @@ function renderTheologianList() {
         <span class="era-group-label">${era.label}</span>
       </div>`;
     for (const a of authors) {
+      const initial = a.name_ko.charAt(0);
       html += `
       <label class="theologian-check-item" data-key="${a.key}">
         <input type="checkbox" value="${a.key}">
+        <span class="theologian-check-avatar" style="background:${era.color}22;color:${era.color}">${initial}</span>
         <span class="theologian-check-name">${a.name_ko}</span>
         <span class="theologian-check-works">${a.work_count}권</span>
       </label>`;
@@ -230,11 +232,14 @@ function showSpeakerPicker() {
   const isFirst = spokenInRound.size === 0;
   pickerLabel.textContent = isFirst ? "누가 먼저 답할까요?" : "다음 발언자를 선택하세요";
 
-  pickerButtons.innerHTML = remaining.map(t => `
+  pickerButtons.innerHTML = remaining.map(t => {
+    const initial = t.name_ko.charAt(0);
+    return `
     <button type="button" class="picker-btn" data-key="${t.key}" data-name="${escapeAttr(t.name_ko)}">
-      ${escapeHtml(t.name_ko)}
-    </button>
-  `).join("") + (spokenInRound.size > 0 ? `
+      <span class="picker-avatar">${initial}</span>
+      <span>${escapeHtml(t.name_ko)}</span>
+    </button>`;
+  }).join("") + (spokenInRound.size > 0 ? `
     <button type="button" class="picker-btn picker-btn-skip">라운드 종료</button>
   ` : "");
 
