@@ -25,7 +25,8 @@ const ERA_GROUPS = [
   { label: "중세",              color: "#818cf8", min: 1000, max: 1479 },
   { label: "종교개혁",            color: "#f97316", min: 1480, max: 1599 },
   { label: "경건주의 / 부흥운동",   color: "#fb923c", min: 1600, max: 1799 },
-  { label: "현대",              color: "#6b8afd", min: 1800, max: 9999 },
+  { label: "근대 (19세기)",       color: "#38bdf8", min: 1800, max: 1899 },
+  { label: "현대",              color: "#6b8afd", min: 1900, max: 9999 },
 ];
 
 function getEra(born) {
