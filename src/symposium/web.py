@@ -365,28 +365,53 @@ async def symposium_page():
 
 @app.get("/api/confession-text/{filename}")
 async def confession_text(filename: str):
-    """신앙고백서 전문 반환. 너무 길면 앞부분만."""
+    """신앙고백서 전문 반환. 한글 번역 캐시 우선, 긴 텍스트는 목차만."""
+    import re
+    from symposium.ingest import extract_text_file, clean_text
+
     raw_path = PROJECT_ROOT / "data" / "raw" / "confessions" / filename
     if not raw_path.exists():
         raise HTTPException(404, f"{filename} 파일 없음")
+
+    # 한글 번역 캐시 확인
+    ko_stem = Path(filename).stem
+    ko_path = PROJECT_ROOT / "data" / "raw" / "confessions" / f"{ko_stem}.ko.txt"
+    if ko_path.exists():
+        content = ko_path.read_text(encoding="utf-8", errors="replace").strip()
+        return {"filename": filename, "text": content, "mode": "full", "lang": "ko"}
+
+    # 영문 원본 로드
     content = raw_path.read_text(encoding="utf-8", errors="replace")
-    # HTML 파일이면 태그 제거
     if filename.endswith(".html") or filename.endswith(".htm"):
-        from symposium.ingest import extract_text_file
         content = extract_text_file(raw_path)
-    # 정제
-    from symposium.ingest import clean_text
     content = clean_text(content)
-    # 10,000자 초과 시 잘라서 표시
-    truncated = len(content) > 10000
-    if truncated:
-        content = content[:10000]
-    return {
-        "filename": filename,
-        "text": content,
-        "truncated": truncated,
-        "total_length": len(content) if not truncated else raw_path.stat().st_size,
-    }
+
+    # 5,000자 이하: 전문 (번역 필요 표시)
+    if len(content) <= 5000:
+        return {"filename": filename, "text": content, "mode": "full", "lang": "en"}
+
+    # 5,000자 초과: 목차 추출
+    lines = content.split("\n")
+    toc = []
+    heading_re = re.compile(r"^(CHAPTER|ARTICLE|Article|Chapter|Part|PART|QUESTION|Question|Q\.|Lord'?s Day|SECTION|Section|CANON|Canon|Head|HEAD)\b")
+    for i, line in enumerate(lines):
+        stripped = line.strip()
+        if not stripped or len(stripped) > 120:
+            continue
+        if heading_re.match(stripped):
+            # 다음 줄이 제목인지 확인 (짧고 본문이 아닌 줄)
+            if i + 1 < len(lines):
+                next_line = lines[i + 1].strip()
+                if next_line and len(next_line) < 100 and not heading_re.match(next_line):
+                    toc.append(f"{stripped} — {next_line}")
+                    continue
+            toc.append(stripped)
+
+    if not toc:
+        toc = [l.strip() for l in lines if l.strip() and len(l.strip()) < 80 and l.strip().isupper()][:30]
+
+    toc_text = "\n".join(toc) if toc else "(목차를 추출할 수 없습니다)"
+    return {"filename": filename, "text": toc_text, "mode": "toc", "lang": "en", "total_length": len(content)}
 
 
 @app.post("/api/symposium/start")

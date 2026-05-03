@@ -367,7 +367,7 @@ function escapeHtml(str) {
 
 async function loadConfessionText(filename, name) {
   const welcome = chatMessages.querySelector(".chat-welcome");
-  if (welcome) welcome.innerHTML = `<p>${escapeHtml(name)} 전문을 불러오는 중...</p>`;
+  if (welcome) welcome.innerHTML = `<p>${escapeHtml(name)}을(를) 불러오는 중...</p>`;
   try {
     const res = await fetch(`/api/confession-text/${encodeURIComponent(filename)}`);
     if (!res.ok) throw new Error(await res.text());
@@ -375,9 +375,18 @@ async function loadConfessionText(filename, name) {
     chatMessages.innerHTML = "";
     const div = document.createElement("div");
     div.className = "confession-fulltext";
-    div.innerHTML = `<div class="confession-fulltext-title">${escapeHtml(name)}</div>
-      <div class="confession-fulltext-body">${escapeHtml(data.text)}</div>
-      ${data.truncated ? '<div class="confession-truncated">전문이 너무 길어 일부만 표시합니다. 질문하시면 RAG 검색으로 관련 부분을 자동 추출합니다.</div>' : ''}`;
+
+    if (data.mode === "toc") {
+      div.innerHTML = `<div class="confession-fulltext-title">${escapeHtml(name)} — 목차</div>
+        <div class="confession-fulltext-body confession-toc">${escapeHtml(data.text)}</div>
+        <div class="confession-truncated">전문이 길어 목차만 표시합니다. 특정 조항에 대해 질문하시면 RAG 검색으로 해당 부분을 자동 추출합니다.</div>`;
+    } else {
+      const langNote = data.lang === "en" ? '<div class="confession-truncated">영문 원본입니다. 신학자들은 한국어로 토론합니다.</div>' : '';
+      div.innerHTML = `<div class="confession-fulltext-title">${escapeHtml(name)}</div>
+        <div class="confession-fulltext-body">${escapeHtml(data.text)}</div>
+        ${langNote}`;
+    }
+
     chatMessages.appendChild(div);
     scrollToBottom();
   } catch (e) {
