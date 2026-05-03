@@ -59,7 +59,7 @@ async function renderTheologians() {
         html += `
           <a href="/symposium?invite=${encodeURIComponent(a.key)}" class="theologian-card theologian-card-link">
             <div class="theologian-name">${a.name_ko}</div>
-            <div class="theologian-works">${a.work_count}권</div>
+            <div class="theologian-works">${a.tradition || ''}</div>
           </a>`;
       }
       html += `</div></div>`;
