@@ -1,0 +1,92 @@
+author:
+  key: confessions
+  name_ko: 신앙고백서·신조
+  name_en: Creeds and Confessions
+  born: 100
+  tradition: 교회 공의회·교파
+works:
+- file: didache.html
+  title: 디다케 — Didache (Teaching of the Twelve Apostles)
+  year: 100
+  tradition: 초대교회
+- file: ecumenical_creeds.txt
+  title: 공의회 신조 (사도·니케아·아타나시우스·칼케돈) — Ecumenical Creeds (Apostles', Nicene, Athanasian,
+    Chalcedonian)
+  year: 325
+  tradition: 초대교회 공의회
+- file: luthers_small_catechism.txt
+  title: 루터 소교리문답 — Luther's Small Catechism
+  year: 1529
+  tradition: 루터교
+- file: augsburg_confession.txt
+  title: 아우크스부르크 신앙고백 — Augsburg Confession
+  year: 1530
+  tradition: 루터교
+- file: apology_augsburg.txt
+  title: 아우크스부르크 신앙고백 변증론 — Apology of the Augsburg Confession
+  year: 1531
+  tradition: 루터교
+- file: smalcald_articles.txt
+  title: 슈말칼덴 조항 — Smalcald Articles
+  year: 1537
+  tradition: 루터교
+- file: formula_of_concord.html
+  title: 일치신조 — Formula of Concord
+  year: 1577
+  tradition: 루터교
+- file: first_helvetic_confession.html
+  title: 제1 스위스 신앙고백 — First Helvetic Confession
+  year: 1536
+  tradition: 개혁파
+- file: gallican_confession.html
+  title: 갈리아 신앙고백 — Gallican Confession (French Confession of Faith)
+  year: 1559
+  tradition: 개혁파
+- file: scots_confession.html
+  title: 스코틀랜드 신앙고백 — Scots Confession
+  year: 1560
+  tradition: 개혁파
+- file: belgic_confession.html
+  title: 벨직 신앙고백 — Belgic Confession
+  year: 1561
+  tradition: 개혁파
+- file: heidelberg_catechism.html
+  title: 하이델베르크 교리문답 — Heidelberg Catechism
+  year: 1563
+  tradition: 개혁파
+- file: second_helvetic_confession.html
+  title: 제2 스위스 신앙고백 — Second Helvetic Confession
+  year: 1566
+  tradition: 개혁파
+- file: thirty_nine_articles.html
+  title: 39개 신앙조항 — Thirty-Nine Articles of Religion
+  year: 1571
+  tradition: 성공회
+- file: canons_of_dort.html
+  title: 도르트 신조 — Canons of Dort
+  year: 1619
+  tradition: 개혁파
+- file: westminster_confession.html
+  title: 웨스트민스터 신앙고백 — Westminster Confession of Faith
+  year: 1646
+  tradition: 장로교
+- file: westminster_shorter_catechism.html
+  title: 웨스트민스터 소요리 문답 — Westminster Shorter Catechism
+  year: 1647
+  tradition: 장로교
+- file: savoy_declaration.html
+  title: 사보이 선언 — Savoy Declaration
+  year: 1658
+  tradition: 회중교회
+- file: second_london_baptist.html
+  title: 제2 런던 침례교 신앙고백 — Second London Baptist Confession
+  year: 1689
+  tradition: 침례교
+- file: methodist_articles.html
+  title: 감리교 25개 신앙조항 — Methodist Articles of Religion
+  year: 1784
+  tradition: 감리교
+- file: lausanne_covenant.html
+  title: 로잔 언약 — Lausanne Covenant
+  year: 1974
+  tradition: 복음주의
