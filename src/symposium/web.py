@@ -271,6 +271,28 @@ async def list_authors():
     return _get_available_authors()
 
 
+@app.get("/api/confessions")
+async def list_confessions():
+    """신앙고백서 개별 문서를 year 기준으로 반환."""
+    import yaml
+    yml = METADATA_DIR / "confessions.yaml"
+    if not yml.exists():
+        return []
+    with open(yml, encoding="utf-8") as f:
+        meta = yaml.safe_load(f) or {}
+    works = meta.get("works", [])
+    return [
+        {
+            "key": "confessions",
+            "title": w.get("title", ""),
+            "year": w.get("year", 0),
+            "tradition": w.get("tradition", ""),
+            "file": w.get("file", ""),
+        }
+        for w in sorted(works, key=lambda x: x.get("year", 0))
+    ]
+
+
 @app.post("/api/search")
 async def api_search(req: SearchRequest):
     try:

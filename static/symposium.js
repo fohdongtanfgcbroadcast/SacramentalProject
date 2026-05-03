@@ -24,11 +24,17 @@ const urlParams = new URLSearchParams(window.location.search);
 const topicParam = urlParams.get("topic") || "";
 const inviteParams = urlParams.getAll("invite");
 
+let confessionsList = []; // 신앙고백서 개별 문서
+
 // --- Init ---
 async function init() {
   try {
-    const res = await fetch("/api/authors");
-    allAuthors = await res.json();
+    const [authRes, confRes] = await Promise.all([
+      fetch("/api/authors"),
+      fetch("/api/confessions"),
+    ]);
+    allAuthors = await authRes.json();
+    confessionsList = await confRes.json();
     renderTheologianList();
     // URL에서 invite 파라미터로 미리 선택
     if (inviteParams.length > 0) {
@@ -60,16 +66,24 @@ function getEra(born) {
 }
 
 function renderTheologianList() {
-  // 시대별 그룹핑
+  // 신학자 시대별 그룹핑 (confessions 제외)
   const groups = new Map();
   for (const a of allAuthors) {
+    if (a.key === "confessions") continue;
     const era = getEra(a.born);
-    if (!groups.has(era.label)) groups.set(era.label, { era, authors: [] });
+    if (!groups.has(era.label)) groups.set(era.label, { era, authors: [], confessions: [] });
     groups.get(era.label).authors.push(a);
   }
 
+  // 신앙고백서를 시대별로 분배
+  for (const c of confessionsList) {
+    const era = getEra(c.year);
+    if (!groups.has(era.label)) groups.set(era.label, { era, authors: [], confessions: [] });
+    groups.get(era.label).confessions.push(c);
+  }
+
   let html = "";
-  for (const { era, authors } of groups.values()) {
+  for (const { era, authors, confessions } of groups.values()) {
     html += `<div class="era-group">
       <div class="era-group-header">
         <span class="era-group-dot" style="background:${era.color}"></span>
@@ -82,6 +96,18 @@ function renderTheologianList() {
         <span class="theologian-check-name">${a.name_ko}</span>
         <span class="theologian-check-works">${a.work_count}권</span>
       </label>`;
+    }
+    // 해당 시대 신앙고백서
+    if (confessions.length > 0) {
+      html += `<div class="confession-sub-label">신앙고백서</div>`;
+      for (const c of confessions) {
+        const shortTitle = c.title.split(" — ")[0];
+        html += `
+        <div class="confession-item">
+          <span class="confession-name">${shortTitle}</span>
+          <span class="confession-year">${c.year}</span>
+        </div>`;
+      }
     }
     html += `</div>`;
   }
