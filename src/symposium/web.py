@@ -142,6 +142,8 @@ def _get_available_authors() -> list[AuthorInfo]:
 
     authors = []
     for yml in sorted(METADATA_DIR.glob("*.yaml")):
+        if yml.stem == "confessions":
+            continue
         with open(yml, encoding="utf-8") as f:
             meta = yaml.safe_load(f) or {}
         author_info = meta.get("author", {})
