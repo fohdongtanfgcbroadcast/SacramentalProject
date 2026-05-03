@@ -9,6 +9,8 @@ from dataclasses import dataclass, field
 class SymposiumSession:
     session_id: str
     theologians: list[str]  # author key 리스트
+    confession: str = ""  # 토론 대상 신앙고백서 파일명 (비어있으면 일반 향연)
+    confession_name: str = ""  # 한국어 제목
     history: list[dict] = field(default_factory=list)
     # history 항목: {"role": "user"|"theologian", "speaker"?: str, "name_ko"?: str, "text": str}
 
@@ -16,9 +18,9 @@ class SymposiumSession:
 _sessions: dict[str, SymposiumSession] = {}
 
 
-def create_session(theologians: list[str]) -> SymposiumSession:
+def create_session(theologians: list[str], confession: str = "", confession_name: str = "") -> SymposiumSession:
     sid = uuid.uuid4().hex[:12]
-    session = SymposiumSession(session_id=sid, theologians=theologians)
+    session = SymposiumSession(session_id=sid, theologians=theologians, confession=confession, confession_name=confession_name)
     _sessions[sid] = session
     return session
 

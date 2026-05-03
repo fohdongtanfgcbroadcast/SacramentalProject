@@ -319,6 +319,24 @@ footer {
 }
 
 /* Confession sub-items in era groups */
+/* Confession context bar */
+.confession-context {
+  padding: 0.6rem 1.5rem;
+  background: rgba(212, 168, 83, 0.1);
+  border-bottom: 1px solid var(--border);
+  font-size: 0.85rem;
+  color: var(--text);
+}
+
+.confession-context-label {
+  color: var(--gold);
+  font-size: 0.75rem;
+  letter-spacing: 0.03em;
+  margin-right: 0.4rem;
+}
+
+.confessions-section { margin-bottom: 2.5rem; }
+
 .confession-sub-label {
   font-size: 0.68rem;
   color: var(--gold);

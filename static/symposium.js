@@ -23,6 +23,8 @@ const pickerButtons = document.getElementById("pickerButtons");
 const urlParams = new URLSearchParams(window.location.search);
 const topicParam = urlParams.get("topic") || "";
 const inviteParams = urlParams.getAll("invite");
+const confessionParam = urlParams.get("confession") || "";
+const confessionNameParam = urlParams.get("confession_name") || "";
 
 let confessionsList = []; // 신앙고백서 개별 문서
 
@@ -38,6 +40,12 @@ async function init() {
       confessionsList = [];
     }
     renderTheologianList();
+    // 신앙고백서 토론 모드
+    if (confessionParam) {
+      const ctx = document.getElementById("confessionContext");
+      ctx.innerHTML = `<span class="confession-context-label">토론 대상</span> <strong>${escapeHtml(confessionNameParam || confessionParam)}</strong>`;
+      ctx.classList.remove("hidden");
+    }
     // URL에서 invite 파라미터로 미리 선택
     if (inviteParams.length > 0) {
       inviteParams.forEach(key => {
@@ -145,7 +153,7 @@ btnStart.addEventListener("click", async () => {
     const res = await fetch("/api/symposium/start", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ theologians: selectedTheologians, topic: topicParam }),
+      body: JSON.stringify({ theologians: selectedTheologians, topic: topicParam, confession: confessionParam, confession_name: confessionNameParam }),
     });
     if (!res.ok) throw new Error(await res.text());
     const data = await res.json();
@@ -176,7 +184,11 @@ btnStart.addEventListener("click", async () => {
 
     // 채팅 영역 초기화
     chatMessages.innerHTML = "";
-    addSystemMessage("향연이 시작되었습니다. 좌장으로서 질문을 입력하고, 발언자를 지명하세요.");
+    if (data.confession_name) {
+      addSystemMessage(`"${data.confession_name}" 토론이 시작되었습니다. 이 고백서에 대해 질문하고 발언자를 지명하세요.`);
+    } else {
+      addSystemMessage("향연이 시작되었습니다. 좌장으로서 질문을 입력하고, 발언자를 지명하세요.");
+    }
     chatForm.classList.remove("hidden");
     chatInput.focus();
   } catch (e) {

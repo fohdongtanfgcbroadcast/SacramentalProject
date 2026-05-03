@@ -79,6 +79,8 @@ class AuthorInfo(BaseModel):
 class SymposiumStartRequest(BaseModel):
     theologians: list[str]
     topic: str = ""
+    confession: str = ""  # 신앙고백서 파일명
+    confession_name: str = ""  # 한국어 제목
 
 class SymposiumAskRequest(BaseModel):
     session_id: str
@@ -196,6 +198,8 @@ def _build_theologian_prompt(
     question: str,
     hits: list[dict],
     history: list[dict],
+    confession_hits: list[dict] | None = None,
+    confession_name: str = "",
 ) -> str:
     """특정 신학자의 관점으로 답변할 프롬프트 구성."""
     system = THEOLOGIAN_SYSTEM_TEMPLATE.format(
@@ -209,6 +213,14 @@ def _build_theologian_prompt(
     parts = [system, ""]
     if glossary:
         parts.append(glossary)
+
+    # 신앙고백서 토론 컨텍스트
+    if confession_hits and confession_name:
+        parts.extend([f"# 토론 대상: {confession_name}", ""])
+        for i, hit in enumerate(confession_hits, 1):
+            parts.append(f"### 고백서 발췌 {i}\n{hit['text']}\n")
+        parts.append("위 신앙고백서의 내용에 대해 당신의 신학적 관점에서 논평하세요.\n")
+
     parts.extend(["# 참고 자료 (본인 저작에서 발췌)", ""])
     for i, hit in enumerate(hits, 1):
         m = hit["metadata"]
@@ -356,7 +368,7 @@ async def symposium_start(req: SymposiumStartRequest):
     if len(req.theologians) < 1:
         raise HTTPException(400, "최소 1명을 선택해야 합니다.")
 
-    session = create_session(req.theologians)
+    session = create_session(req.theologians, confession=req.confession, confession_name=req.confession_name)
     rq = _load_recommended_questions()
 
     combo_questions = []
@@ -374,6 +386,8 @@ async def symposium_start(req: SymposiumStartRequest):
         "session_id": session.session_id,
         "theologians": theologian_info,
         "recommended_questions": recommended,
+        "confession": session.confession,
+        "confession_name": session.confession_name,
     }
 
 
@@ -385,6 +399,14 @@ async def symposium_ask(req: SymposiumAskRequest):
 
     add_message(req.session_id, "user", req.message)
 
+    # 신앙고백서 컨텍스트 검색 (세션에 confession이 있으면)
+    confession_hits = []
+    if session.confession:
+        try:
+            confession_hits = search(req.message, "confessions", CHROMA_DIR, top_k=5)
+        except Exception:
+            confession_hits = []
+
     async def event_generator():
         for author_key in session.theologians:
             meta = _get_author_meta(author_key)
@@ -393,7 +415,7 @@ async def symposium_ask(req: SymposiumAskRequest):
             except Exception:
                 hits = []
 
-            prompt = _build_theologian_prompt(meta, req.message, hits, session.history)
+            prompt = _build_theologian_prompt(meta, req.message, hits, session.history, confession_hits, session.confession_name)
 
             try:
                 answer = await _call_claude(prompt)
@@ -437,13 +459,21 @@ async def symposium_direct(req: SymposiumDirectRequest):
 
     add_message(req.session_id, "user", req.message)
 
+    # 신앙고백서 컨텍스트
+    confession_hits = []
+    if session.confession:
+        try:
+            confession_hits = search(req.message, "confessions", CHROMA_DIR, top_k=5)
+        except Exception:
+            confession_hits = []
+
     meta = _get_author_meta(req.target)
     try:
         hits = search(req.message, req.target, CHROMA_DIR, top_k=5)
     except Exception:
         hits = []
 
-    prompt = _build_theologian_prompt(meta, req.message, hits, session.history)
+    prompt = _build_theologian_prompt(meta, req.message, hits, session.history, confession_hits, session.confession_name)
     answer = await _call_claude(prompt)
 
     add_message(req.session_id, "theologian", answer, speaker=req.target, name_ko=meta["name_ko"])

@@ -70,5 +70,25 @@ async function renderTheologians() {
   }
 }
 
+async function renderConfessions() {
+  const grid = document.getElementById("confessionCards");
+  if (!grid) return;
+  try {
+    const res = await fetch("/api/confessions");
+    const confessions = await res.json();
+    grid.innerHTML = confessions.map(c => {
+      const shortTitle = c.title.split(" — ")[0];
+      return `
+      <a href="/symposium?confession=${encodeURIComponent(c.file)}&confession_name=${encodeURIComponent(shortTitle)}" class="topic-card">
+        <div class="topic-name">${shortTitle}</div>
+        <div class="topic-desc">${c.tradition} · ${c.year}</div>
+      </a>`;
+    }).join("");
+  } catch (e) {
+    grid.innerHTML = '<p class="dim">불러올 수 없습니다.</p>';
+  }
+}
+
 renderTopics();
+renderConfessions();
 renderTheologians();
