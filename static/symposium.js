@@ -107,8 +107,8 @@ function renderTheologianList() {
         <span class="theologian-check-works">${a.work_count}권</span>
       </label>`;
     }
-    // 해당 시대 신앙고백서
-    if (confessions.length > 0) {
+    // 해당 시대 신앙고백서 (교부 시대 제외)
+    if (confessions.length > 0 && era.label !== "교부 시대") {
       html += `<div class="confession-sub-label">신앙고백서</div>`;
       for (const c of confessions) {
         const shortTitle = c.title.split(" — ")[0];
