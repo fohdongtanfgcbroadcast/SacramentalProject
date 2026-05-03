@@ -63,13 +63,13 @@ async function init() {
 }
 
 const ERA_GROUPS = [
-  { label: "교부 시대",           color: "#c084fc", min: 0,    max: 499  },
-  { label: "중세 초기",           color: "#a78bfa", min: 500,  max: 999  },
-  { label: "중세",              color: "#818cf8", min: 1000, max: 1479 },
-  { label: "종교개혁",            color: "#f97316", min: 1480, max: 1599 },
-  { label: "경건주의 / 부흥운동",   color: "#fb923c", min: 1600, max: 1799 },
-  { label: "근대 (19세기)",       color: "#38bdf8", min: 1800, max: 1899 },
-  { label: "현대",              color: "#6b8afd", min: 1900, max: 9999 },
+  { label: "교부 시대",           color: "#c084fc", min: 0,    max: 499,  shape: "circle" },
+  { label: "중세 초기",           color: "#a78bfa", min: 500,  max: 999,  shape: "square" },
+  { label: "중세",              color: "#818cf8", min: 1000, max: 1479, shape: "diamond" },
+  { label: "종교개혁",            color: "#f97316", min: 1480, max: 1599, shape: "triangle" },
+  { label: "경건주의 / 부흥운동",   color: "#fb923c", min: 1600, max: 1799, shape: "hexagon" },
+  { label: "근대 (19세기)",       color: "#38bdf8", min: 1800, max: 1899, shape: "star" },
+  { label: "현대",              color: "#6b8afd", min: 1900, max: 9999, shape: "cross" },
 ];
 
 function getEra(born) {
@@ -101,11 +101,12 @@ function renderTheologianList() {
         <span class="era-group-label">${era.label}</span>
       </div>`;
     for (const a of authors) {
-      const initial = a.name_ko.charAt(0);
       html += `
       <label class="theologian-check-item" data-key="${a.key}">
         <input type="checkbox" value="${a.key}">
-        <span class="theologian-check-avatar" style="background:${era.color}22;color:${era.color}">${initial}</span>
+        <span class="theologian-check-avatar" style="background:${era.color}18;color:${era.color}">
+          <span class="avatar-shape shape-${era.shape}"></span>
+        </span>
         <span class="theologian-check-name">${a.name_ko}</span>
         <span class="theologian-check-works">${a.work_count}권</span>
       </label>`;
@@ -233,10 +234,13 @@ function showSpeakerPicker() {
   pickerLabel.textContent = isFirst ? "누가 먼저 답할까요?" : "다음 발언자를 선택하세요";
 
   pickerButtons.innerHTML = remaining.map(t => {
-    const initial = t.name_ko.charAt(0);
+    const tAuthor = allAuthors.find(a => a.key === t.key);
+    const tEra = tAuthor ? getEra(tAuthor.born) : ERA_GROUPS[0];
     return `
     <button type="button" class="picker-btn" data-key="${t.key}" data-name="${escapeAttr(t.name_ko)}">
-      <span class="picker-avatar">${initial}</span>
+      <span class="picker-avatar" style="background:${tEra.color}18;color:${tEra.color}">
+        <span class="avatar-shape shape-${tEra.shape}"></span>
+      </span>
       <span>${escapeHtml(t.name_ko)}</span>
     </button>`;
   }).join("") + (spokenInRound.size > 0 ? `
