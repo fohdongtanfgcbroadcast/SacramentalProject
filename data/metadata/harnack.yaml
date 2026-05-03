@@ -1,0 +1,16 @@
+author:
+  key: harnack
+  name_ko: 아돌프 폰 하르낙
+  name_en: Adolf von Harnack
+  born: 1851
+  tradition: 자유주의 신학
+works:
+- file: history_of_dogma_vol1.txt
+  title: "History of Dogma Vol.1 (교의사 1)"
+  year: 1894
+- file: history_of_dogma_vol2.txt
+  title: "History of Dogma Vol.2 (교의사 2)"
+  year: 1894
+- file: what_is_christianity.txt
+  title: "What is Christianity? (기독교의 본질)"
+  year: 1900

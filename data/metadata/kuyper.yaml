@@ -1,0 +1,13 @@
+author:
+  key: kuyper
+  name_ko: 아브라함 카이퍼
+  name_en: Abraham Kuyper
+  born: 1837
+  tradition: 신칼뱅주의
+works:
+- file: lectures_on_calvinism.txt
+  title: "Lectures on Calvinism (칼뱅주의 강연)"
+  year: 1899
+- file: work_of_the_holy_spirit.txt
+  title: "The Work of the Holy Spirit (성령의 사역)"
+  year: 1888

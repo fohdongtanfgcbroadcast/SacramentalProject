@@ -1,0 +1,19 @@
+author:
+  key: hodge
+  name_ko: 찰스 호지
+  name_en: Charles Hodge
+  born: 1797
+  tradition: 프린스턴 신학
+works:
+- file: systematic_theology_vol1.txt
+  title: "Systematic Theology Vol.1 - Theology (조직신학 제1권)"
+  year: 1871
+- file: systematic_theology_vol2.txt
+  title: "Systematic Theology Vol.2 - Anthropology (조직신학 제2권)"
+  year: 1872
+- file: systematic_theology_vol3.txt
+  title: "Systematic Theology Vol.3 - Soteriology & Eschatology (조직신학 제3권)"
+  year: 1873
+- file: what_is_darwinism.txt
+  title: "What is Darwinism? (다윈주의란 무엇인가?)"
+  year: 1874

@@ -1,0 +1,22 @@
+author:
+  key: schleiermacher
+  name_ko: 프리드리히 슐라이어마허
+  name_en: Friedrich Schleiermacher
+  born: 1768
+  tradition: 자유주의 신학
+works:
+- file: on_religion.txt
+  title: "On Religion: Speeches to Its Cultured Despisers (종교론)"
+  year: 1799
+- file: christian_faith.txt
+  title: "The Christian Faith (기독교 신앙)"
+  year: 1830
+- file: christian_faith_outline.txt
+  title: "The Christian Faith in Outline (기독교 신앙 개요)"
+  year: 1884
+- file: selected_sermons.txt
+  title: "Selected Sermons of Schleiermacher (슐라이어마허 설교 선집)"
+  year: 1890
+- file: theology_of_schleiermacher.txt
+  title: "The Theology of Schleiermacher (슐라이어마허의 신학)"
+  year: 1911

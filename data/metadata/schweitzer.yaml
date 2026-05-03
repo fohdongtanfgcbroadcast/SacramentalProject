@@ -1,0 +1,13 @@
+author:
+  key: schweitzer
+  name_ko: 알베르트 슈바이처
+  name_en: Albert Schweitzer
+  born: 1875
+  tradition: 자유주의 신학
+works:
+- file: quest_historical_jesus.txt
+  title: "The Quest of the Historical Jesus (역사적 예수 탐구)"
+  year: 1906
+- file: mystery_kingdom_of_god.txt
+  title: "The Mystery of the Kingdom of God (하나님 나라의 비밀)"
+  year: 1901

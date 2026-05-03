@@ -1,0 +1,10 @@
+author:
+  key: kierkegaard
+  name_ko: 쇠렌 키르케고르
+  name_en: Søren Kierkegaard
+  born: 1813
+  tradition: 실존주의 신학
+works:
+- file: selections.txt
+  title: "Selections from the Writings of Kierkegaard (키르케고르 선집)"
+  year: 1923

@@ -1,0 +1,10 @@
+author:
+  key: ritschl
+  name_ko: 알브레히트 리츨
+  name_en: Albrecht Ritschl
+  born: 1822
+  tradition: 자유주의 신학
+works:
+- file: justification_and_reconciliation.txt
+  title: "The Christian Doctrine of Justification and Reconciliation (칭의와 화해의 기독교 교리)"
+  year: 1874

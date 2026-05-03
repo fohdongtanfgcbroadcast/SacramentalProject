@@ -1,0 +1,13 @@
+author:
+  key: bavinck
+  name_ko: 헤르만 바빙크
+  name_en: Herman Bavinck
+  born: 1854
+  tradition: 신칼뱅주의
+works:
+- file: philosophy_of_revelation.txt
+  title: "Philosophy of Revelation (계시의 철학)"
+  year: 1908
+- file: our_reasonable_faith.txt
+  title: "Our Reasonable Faith (우리의 합리적 신앙)"
+  year: 1909
