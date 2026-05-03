@@ -8,29 +8,32 @@
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
 :root {
-  --bg: #0a0a0a;
-  --surface: #141414;
-  --card: #1a1a1a;
-  --border: #252525;
-  --text: #e0e0e0;
-  --text-dim: #777;
-  --text-muted: #555;
-  --accent: #6b8afd;
+  --bg: #1a1510;
+  --surface: #211c14;
+  --card: #2a2318;
+  --border: #3d3428;
+  --text: #e8e0d4;
+  --text-dim: #9e9282;
+  --text-muted: #706456;
+  --accent: #c49a5c;
   --gold: #d4a853;
-  --green: #4ade80;
-  --era-patristic: #c084fc;
-  --era-medieval-early: #a78bfa;
-  --era-medieval: #818cf8;
-  --era-reformation: #f97316;
-  --era-pietism: #fb923c;
-  --era-liberal: #38bdf8;
-  --era-neoorthodox: #2dd4bf;
-  --era-modern: #6b8afd;
+  --green: #7ab87a;
+  --era-patristic: #c9a86c;
+  --era-medieval-early: #b89a6a;
+  --era-medieval: #a88c68;
+  --era-reformation: #d4874a;
+  --era-pietism: #c89050;
+  --era-liberal: #7aadbd;
+  --era-neoorthodox: #6db8a8;
+  --era-modern: #8a9ec0;
 }
 
 body {
-  font-family: 'Noto Serif KR', 'Georgia', serif;
+  font-family: 'Georgia', 'Noto Serif KR', 'Times New Roman', serif;
   background: var(--bg);
+  background-image:
+    radial-gradient(ellipse at 20% 0%, rgba(180, 140, 80, 0.08) 0%, transparent 60%),
+    radial-gradient(ellipse at 80% 100%, rgba(140, 100, 60, 0.06) 0%, transparent 60%);
   color: var(--text);
   min-height: 100vh;
   line-height: 1.6;
@@ -40,7 +43,7 @@ body {
 .hero {
   text-align: center;
   padding: 5rem 1rem 3rem;
-  background: linear-gradient(180deg, #111 0%, var(--bg) 100%);
+  background: linear-gradient(180deg, #241e15 0%, var(--bg) 100%);
   border-bottom: 1px solid var(--border);
 }
 
@@ -154,7 +157,7 @@ body {
 
 .card.done {
   border-color: var(--green);
-  background: #0a1a0a;
+  background: #1e2a1a;
 }
 
 .card.done::after {
