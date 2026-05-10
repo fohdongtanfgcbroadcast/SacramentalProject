@@ -1,0 +1,16 @@
+author:
+  key: bernard
+  name_ko: 클레르보의 버나드
+  name_en: Bernard of Clairvaux
+  born: 1090
+  tradition: 시토회
+works:
+- file: on_loving_god.txt
+  title: On Loving God (하나님 사랑에 대하여)
+  year: 1132
+- file: letters.txt
+  title: Some Letters of Saint Bernard (서신집)
+  year: 1140
+- file: life_st_malachy.txt
+  title: Life of St. Malachy of Armagh
+  year: 1149
