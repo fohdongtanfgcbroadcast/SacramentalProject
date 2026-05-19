@@ -1,0 +1,10 @@
+author:
+  key: basil
+  name_ko: 대 바실리오스
+  name_en: Basil the Great
+  born: 330
+  tradition: 교부
+works:
+- file: letters_select_works.txt
+  title: St. Basil — Letters and Select Works (서간집·정선 저작; On the Holy Spirit, Hexaemeron 포함, NPNF2-08)
+  year: 375

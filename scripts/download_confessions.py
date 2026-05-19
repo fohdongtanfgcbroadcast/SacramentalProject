@@ -34,6 +34,11 @@ CONFESSIONS = [
      "https://www.gutenberg.org/cache/epub/1670/pg1670.txt",
      "루터교"),
 
+    ("luthers_large_catechism.txt", "Luther's Large Catechism",
+     "루터 대교리문답", 1529,
+     "https://www.gutenberg.org/cache/epub/1722/pg1722.txt",
+     "루터교"),
+
     ("augsburg_confession.txt", "Augsburg Confession",
      "아우크스부르크 신앙고백", 1530,
      "https://www.gutenberg.org/cache/epub/275/pg275.txt",
@@ -85,11 +90,37 @@ CONFESSIONS = [
      "https://ccel.org/ccel/schaff/creeds3/creeds3.iv.v.html",
      "개혁파"),
 
+    ("geneva_catechism.txt", "Catechism of the Church of Geneva (Calvin)",
+     "제네바 교리문답", 1545,
+     "https://archive.org/download/catechismofchurc00calvrich/catechismofchurc00calvrich_djvu.txt",
+     "개혁파"),
+
     # ─── 성공회 ───
+    ("anglican_catechism.html", "The Anglican Catechism (Book of Common Prayer)",
+     "성공회 교리문답", 1549,
+     "https://ccel.org/ccel/schaff/creeds3/creeds3.iv.xii.html",
+     "성공회"),
+
     ("thirty_nine_articles.html", "Thirty-Nine Articles of Religion",
      "39개 신앙조항", 1571,
      "https://ccel.org/ccel/schaff/creeds3/creeds3.iv.xi.html",
      "성공회"),
+
+    ("lambeth_articles.html", "Lambeth Articles",
+     "램버스 신조", 1595,
+     "https://ccel.org/ccel/schaff/creeds3/creeds3.iv.xiii.html",
+     "성공회"),
+
+    ("irish_articles.html", "Irish Articles of Religion",
+     "아일랜드 신조", 1615,
+     "https://ccel.org/ccel/schaff/creeds3/creeds3.iv.xiv.html",
+     "성공회"),
+
+    # ─── 항론파 (아르미니우스주의) ───
+    ("arminian_articles.html", "Articles of the Remonstrants (Five Arminian Articles)",
+     "아르미니우스 항론파 5개조", 1610,
+     "https://ccel.org/ccel/schaff/creeds3/creeds3.iv.xv.html",
+     "항론파"),
 
     # ─── 개혁파 정통 (17세기) ───
     ("canons_of_dort.html", "Canons of Dort",
@@ -107,10 +138,25 @@ CONFESSIONS = [
      "https://ccel.org/ccel/schaff/creeds3/creeds3.iv.xviii.html",
      "장로교"),
 
+    ("westminster_larger_catechism.html", "Westminster Larger Catechism",
+     "웨스트민스터 대요리 문답", 1647,
+     "https://www.opc.org/lc.html",
+     "장로교"),
+
+    ("cambridge_platform.txt", "Cambridge Platform of Church Discipline",
+     "케임브리지 강령", 1648,
+     "https://archive.org/download/cambridgeplatfo00cong/cambridgeplatfo00cong_djvu.txt",
+     "회중교회"),
+
     ("savoy_declaration.html", "Savoy Declaration",
      "사보이 선언", 1658,
      "https://ccel.org/ccel/schaff/creeds3/creeds3.v.i.i.html",
      "회중교회"),
+
+    ("first_london_baptist.html", "First London Baptist Confession",
+     "제1 런던 침례교 신앙고백", 1644,
+     "https://www.reformedreader.org/ccc/1644lbc.htm",
+     "침례교"),
 
     ("second_london_baptist.html", "Second London Baptist Confession",
      "제2 런던 침례교 신앙고백", 1689,
@@ -208,11 +254,10 @@ def main():
 
     # 미포함 안내
     print("\n[참고] 소스 미확보로 미포함:")
-    print("  - 제네바 교리문답 (1542) — CCEL/Gutenberg에 없음")
-    print("  - 웨스트민스터 대요리 문답 (1647) — Schaff에 별도 항목 없음")
-    print("  - 바르멘 선언 (1934) — 공개 URL 미발견")
+    print("  - 바르멘 선언 (1934) — 영역본/독문 공개 소스 미확보, 저작권 모호")
     print("  - 벨하르 신앙고백 (1982) — 저작권")
     print("  - 제2차 바티칸 공의회 문헌 — 저작권")
+    print("  ※ 제네바 교리문답·케임브리지 강령은 Internet Archive 스캔본으로 확보(OCR)")
 
 
 if __name__ == "__main__":

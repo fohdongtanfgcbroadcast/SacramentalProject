@@ -1,0 +1,16 @@
+author:
+  key: tertullian
+  name_ko: 테르툴리아누스
+  name_en: Tertullian
+  born: 155
+  tradition: 교부
+works:
+- file: writings_v1.txt
+  title: The Writings of Tertullian, Vol.1 — Apology, To the Nations 외 (호교론 외)
+  year: 200
+- file: writings_v2.txt
+  title: The Writings of Tertullian, Vol.2 — Against Marcion 외 (마르키온 반박 외)
+  year: 207
+- file: writings_v3.txt
+  title: The Writings of Tertullian, Vol.3 — Against Praxeas, On the Soul 외 (프락세아스 반박·영혼론 외)
+  year: 210

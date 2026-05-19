@@ -1,0 +1,13 @@
+author:
+  key: irenaeus
+  name_ko: 이레네우스
+  name_en: Irenaeus of Lyons
+  born: 130
+  tradition: 교부
+works:
+- file: against_heresies_v1.txt
+  title: The Writings of Irenaeus, Vol.1 — Against Heresies I–III (이단 반박 1권)
+  year: 180
+- file: against_heresies_v2.txt
+  title: The Writings of Irenaeus, Vol.2 — Against Heresies IV–V, Fragments (이단 반박 2권)
+  year: 180

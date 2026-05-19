@@ -9,13 +9,17 @@ works:
   title: 디다케 — Didache (Teaching of the Twelve Apostles)
   year: 100
   tradition: 초대교회
-- file: ecumenical_creeds.txt
+- file: ecumenical_creeds.html
   title: 공의회 신조 (사도·니케아·아타나시우스·칼케돈) — Ecumenical Creeds (Apostles', Nicene, Athanasian,
     Chalcedonian)
   year: 325
   tradition: 초대교회 공의회
 - file: luthers_small_catechism.txt
   title: 루터 소교리문답 — Luther's Small Catechism
+  year: 1529
+  tradition: 루터교
+- file: luthers_large_catechism.txt
+  title: 루터 대교리문답 — Luther's Large Catechism
   year: 1529
   tradition: 루터교
 - file: augsburg_confession.txt
@@ -58,10 +62,30 @@ works:
   title: 제2 스위스 신앙고백 — Second Helvetic Confession
   year: 1566
   tradition: 개혁파
+- file: geneva_catechism.txt
+  title: 제네바 교리문답 — Catechism of the Church of Geneva (Calvin)
+  year: 1545
+  tradition: 개혁파
+- file: anglican_catechism.html
+  title: 성공회 교리문답 — The Anglican Catechism (Book of Common Prayer)
+  year: 1549
+  tradition: 성공회
 - file: thirty_nine_articles.html
   title: 39개 신앙조항 — Thirty-Nine Articles of Religion
   year: 1571
   tradition: 성공회
+- file: lambeth_articles.html
+  title: 램버스 신조 — Lambeth Articles
+  year: 1595
+  tradition: 성공회
+- file: irish_articles.html
+  title: 아일랜드 신조 — Irish Articles of Religion
+  year: 1615
+  tradition: 성공회
+- file: arminian_articles.html
+  title: 아르미니우스 항론파 5개조 — Articles of the Remonstrants (Five Arminian Articles)
+  year: 1610
+  tradition: 항론파
 - file: canons_of_dort.html
   title: 도르트 신조 — Canons of Dort
   year: 1619
@@ -74,10 +98,22 @@ works:
   title: 웨스트민스터 소요리 문답 — Westminster Shorter Catechism
   year: 1647
   tradition: 장로교
+- file: westminster_larger_catechism.html
+  title: 웨스트민스터 대요리 문답 — Westminster Larger Catechism
+  year: 1647
+  tradition: 장로교
+- file: cambridge_platform.txt
+  title: 케임브리지 강령 — Cambridge Platform of Church Discipline
+  year: 1648
+  tradition: 회중교회
 - file: savoy_declaration.html
   title: 사보이 선언 — Savoy Declaration
   year: 1658
   tradition: 회중교회
+- file: first_london_baptist.html
+  title: 제1 런던 침례교 신앙고백 — First London Baptist Confession
+  year: 1644
+  tradition: 침례교
 - file: second_london_baptist.html
   title: 제2 런던 침례교 신앙고백 — Second London Baptist Confession
   year: 1689

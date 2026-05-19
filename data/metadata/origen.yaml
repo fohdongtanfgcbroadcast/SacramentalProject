@@ -1,0 +1,13 @@
+author:
+  key: origen
+  name_ko: 오리게네스
+  name_en: Origen of Alexandria
+  born: 184
+  tradition: 교부
+works:
+- file: writings_v1.txt
+  title: The Writings of Origen, Vol.1 — De Principiis, Against Celsus I (원리론·켈수스 반박 1)
+  year: 230
+- file: writings_v2.txt
+  title: The Writings of Origen, Vol.2 — Against Celsus II–VIII (켈수스 반박 2)
+  year: 248

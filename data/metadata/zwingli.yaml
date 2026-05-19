@@ -1,0 +1,16 @@
+author:
+  key: zwingli
+  name_ko: 울리히 츠빙글리
+  name_en: Ulrich Zwingli
+  born: 1484
+  tradition: 개혁파
+works:
+- file: selected_works.txt
+  title: Selected Works of Huldreich Zwingli (츠빙글리 선집, Jackson 영역 1901)
+  year: 1901
+- file: latin_works_v1.txt
+  title: The Latin Works and Correspondence of Huldreich Zwingli, Vol.1 (라틴 저작·서신 1권)
+  year: 1912
+- file: latin_works_v2.txt
+  title: The Latin Works and Correspondence of Huldreich Zwingli, Vol.2 (라틴 저작·서신 2권)
+  year: 1912
