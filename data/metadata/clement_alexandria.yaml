@@ -1,0 +1,13 @@
+author:
+  key: clement_alexandria
+  name_ko: 알렉산드리아의 클레멘스
+  name_en: Clement of Alexandria
+  born: 150
+  tradition: 교부
+works:
+- file: writings_v1.txt
+  title: The Writings of Clement of Alexandria, Vol.1 — Exhortation, Instructor (권면·교사)
+  year: 198
+- file: writings_v2.txt
+  title: The Writings of Clement of Alexandria, Vol.2 — Stromata/Miscellanies (양탄자)
+  year: 203

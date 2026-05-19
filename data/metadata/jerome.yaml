@@ -1,0 +1,10 @@
+author:
+  key: jerome
+  name_ko: 예로니무스
+  name_en: Jerome
+  born: 342
+  tradition: 교부
+works:
+- file: letters_select_works.txt
+  title: St. Jerome — Letters and Select Works (서간·정선 저작; 불가타 서문, 펠라기우스 반박 외, NPNF2-06)
+  year: 390

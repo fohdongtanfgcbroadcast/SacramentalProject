@@ -1,0 +1,13 @@
+author:
+  key: cyprian
+  name_ko: 키프리아누스
+  name_en: Cyprian of Carthage
+  born: 200
+  tradition: 교부
+works:
+- file: writings_v1.txt
+  title: The Writings of Cyprian, Vol.1 — Epistles (서신집)
+  year: 250
+- file: writings_v2.txt
+  title: The Writings of Cyprian, Vol.2 — Treatises, On the Unity of the Church (논문집·교회일치론)
+  year: 251

@@ -1,0 +1,10 @@
+author:
+  key: cyril_jerusalem
+  name_ko: 예루살렘의 키릴로스
+  name_en: Cyril of Jerusalem
+  born: 313
+  tradition: 교부
+works:
+- file: catechetical_lectures.txt
+  title: The Catechetical Lectures of S. Cyril of Jerusalem (예루살렘의 키릴 교리강해, Oxford Library of Fathers)
+  year: 350

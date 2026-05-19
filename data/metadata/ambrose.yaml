@@ -1,0 +1,10 @@
+author:
+  key: ambrose
+  name_ko: 암브로시우스
+  name_en: Ambrose of Milan
+  born: 340
+  tradition: 교부
+works:
+- file: select_works_letters.txt
+  title: St. Ambrose — Select Works and Letters (정선 저작·서간; On the Duties, On the Holy Spirit, On the Faith, NPNF2-10)
+  year: 380

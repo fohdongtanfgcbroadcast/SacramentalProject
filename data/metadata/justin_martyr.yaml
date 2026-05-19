@@ -1,0 +1,10 @@
+author:
+  key: justin_martyr
+  name_ko: 유스티누스
+  name_en: Justin Martyr
+  born: 100
+  tradition: 교부
+works:
+- file: writings.txt
+  title: The Writings of Justin Martyr — First/Second Apology, Dialogue with Trypho (호교론·트리포와의 대화, ANCL)
+  year: 155
