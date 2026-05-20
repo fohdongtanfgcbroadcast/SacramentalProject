@@ -2,6 +2,35 @@
 
 이 프로젝트의 주요 변경 사항을 기록한다. (이전 변경은 git 로그 참조)
 
+## [0.9.0] - 2026-05-21
+
+### Changed — Class A 7개 일괄 재인제스트 (Step 5 ③, Step 2 누락 보정)
+
+v5 잔여 상위 오염은 모두 bunyan 과 동일 패턴(Step 2 strip 적용 이전
+인제스트가 남은 상태). 코드 변경 없이 일괄 재인제스트만으로 해소.
+
+| 컬렉션 | 청크 변화 | junk % 변화 |
+|---|---|---|
+| confessions | 6,470 → 4,776 (-26%) | 3.4 → 0.3 |
+| kierkegaard | 1,040 → 1,006 | 3.3 → 0.0 |
+| edwards | 4,032 → 3,919 | 3.2 → 0.0 |
+| luther | 14,941 → 14,433 | 2.6 → 0.0 |
+| harnack | 5,841 → 5,530 | 2.1 → 0.1 |
+| melanchthon | 1,541 → 1,503 | 2.1 → 0.0 |
+| schweitzer | 3,253 → 3,193 | 2.1 → 0.1 |
+
+총 청크 609,895 → 607,137 (-2,758, strip 자연 감소). confessions 가
+-26% 로 가장 큰 감소(NewAdvent CCEL boilerplate 다수 제거).
+
+### Notes — 코퍼스 전체 상태
+
+이 시점부터 **junk % > 2% 컬렉션이 없다.** 새 상위 1위 whitefield 1.7%
+(동일 Class A 패턴, 추가 일괄 재인제스트로 해소 가능). 남은 *구조적*
+잡음은 OCR Class C(strip 무효): zinzendorf·watts(OCR 손상),
+moltmann ocr 99.5%(한글 본문 오탐) 정도.
+
+측정 v6: `docs/data_quality_audit_2026-05-21.md`.
+
 ## [0.8.0] - 2026-05-20
 
 ### Added — wesley 정본 회복 (Step 5 ①, Class B 해소)
