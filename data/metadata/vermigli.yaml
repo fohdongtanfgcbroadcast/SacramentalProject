@@ -6,19 +6,12 @@ author:
   died: 1562
   tradition: 개혁파
 works:
-  - title: "The Common Places, Volume 1"
-    file: common_places_vol1.txt
+  - title: "The Common Places (Loci Communes), English translation 1583"
+    file: common_places.txt
     year: 1583
-    edition: "English translation by Anthonie Marten (1583/1639 reprint)"
-    source: "https://archive.org/details/PeterMartyrVermigliCommonPlacesA1639"
-    format: djvu_txt_ocr
+    edition: "English translation by Anthonie Marten (London: Denham & Middleton, 1583); EEBO-TCP Phase 2 TEI P5 transcription"
+    source: "https://github.com/textcreationpartnership/A14350"
+    license: CC0-1.0
+    format: eebo_tcp_tei_p5
     language: en
-    note: "Early Modern English, OCR from blackletter typeface"
-  - title: "The Common Places, Volume 2"
-    file: common_places_vol2.txt
-    year: 1583
-    edition: "English translation by Anthonie Marten (1583)"
-    source: "https://archive.org/details/PeterMartyrVermigliCommonPlacesB1376"
-    format: djvu_txt_ocr
-    language: en
-    note: "Early Modern English, OCR from blackletter typeface"
+    note: "EEBO-TCP A14350 — STC 24669 / ESTC S117880. Diplomatic transcription, human-keyboarded (QA 5%+). long-s ſ/ʃ → s 정규화 외 Early Modern English 표기(v/u, j/i, &c.) 그대로 보존. 추출: scripts/extract_eebo_tcp.py. 기존 djvu OCR(common_places_vol1.txt + vol2.txt, blackletter 깨짐 심각)을 대체."

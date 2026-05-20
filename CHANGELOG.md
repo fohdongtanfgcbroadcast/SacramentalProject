@@ -2,6 +2,35 @@
 
 이 프로젝트의 주요 변경 사항을 기록한다. (이전 변경은 git 로그 참조)
 
+## [0.6.0] - 2026-05-20
+
+### Added — EEBO-TCP 도입 + vermigli OCR 손상 근본 해결 (Step 5 ①)
+
+v2 의 새 상위 오염 1위 vermigli(junk 4.2%, OCR Class C — 블랙레터
+djvu 깨짐, strip 무효) 를 EEBO-TCP 의 사람이 직접 keyboarded 한 TEI P5
+transcription 으로 교체했다.
+
+- `scripts/extract_eebo_tcp.py` 신규: EEBO-TCP A14350.xml(TEI P5,
+  CC0 1.0) → plain text. long-s `ſ/ʃ` → `s` 정규화, `<note>` 별도 줄,
+  `<gap>` → '…', Early Modern English 표기(v/u, j/i, &c.) 보존.
+  향후 다른 EEBO-TCP 책에도 재사용 가능.
+- `data/raw/vermigli/A14350.xml` (14.3MB), `common_places.txt`
+  (10.3MB) 추가. 기존 djvu OCR 두 권은 `*.djvu_legacy.txt` 로 백업
+  (삭제 X).
+- `data/metadata/vermigli.yaml`: works 항목을 `common_places_vol1/2`
+  djvu → 단일 `common_places` (EEBO-TCP A14350, CC0-1.0) 로 교체.
+
+### Changed — vermigli 재인제스트
+
+- ChromaDB vermigli 컬렉션 삭제 후 정제된 TEI 본문으로 재인제스트:
+  21,507 청크 → 21,593 청크 (-1.5% 자연 변동).
+- 측정 v3 (`docs/data_quality_audit_2026-05-20_v3.md`):
+    junk % 4.2 → **0.0**, severe % 0.0 → 0.0,
+    원본 단위 OCR 깨짐 시그니처(자음 5+ 연속 단어) **57,666 → 372 (-99.4%)**.
+  ocr % 2.5 → 6.5 증가는 EEBO-TCP `<foreign>`/`<note>` 보존에 따른
+  정상 라틴어 인용·각주 — 손상 아님.
+- 새 상위 오염 1위: bunyan 4.0% (Gutenberg license boilerplate, Class A).
+
 ## [0.5.0] - 2026-05-20
 
 ### Added — 데이터 품질 감사 v2 (Step 4 재측정)
