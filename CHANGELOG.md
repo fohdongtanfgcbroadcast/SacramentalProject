@@ -2,6 +2,22 @@
 
 이 프로젝트의 주요 변경 사항을 기록한다. (이전 변경은 git 로그 참조)
 
+## [0.7.0] - 2026-05-20
+
+### Changed — bunyan 재인제스트 (Step 5 ④, 누락 보정)
+
+v3 에서 bunyan(junk 4.0%) 이 새 상위 오염 1위가 됐는데, 진단 결과 코드
+변경 불필요 — Step 2 strip(`textclean.strip_web_chrome`, 커밋 `da11213`)
+의 Gutenberg `*** START`/`*** END` 마커 슬라이싱이 이미 잡아냄. bunyan
+은 단지 Step 2 적용 *이전* 인제스트가 남아있었고, Step 3 에서 junk>5%
+임계값으로 골랐을 때 4.0% 인 bunyan 이 제외돼 누락된 것.
+
+- 재인제스트: 2,538 → 2,426 청크 (-112, strip 자연 감소).
+- 측정 v4 (`docs/data_quality_audit_2026-05-20_v4.md`):
+    bunyan junk % 4.0 → **0.0**, severe % 1.7 → 0.0.
+- 새 상위 1위: confessions 3.4% (NewAdvent CCEL + Gutenberg 혼합,
+  동일 패턴 — 동일 처리로 해소 가능).
+
 ## [0.6.0] - 2026-05-20
 
 ### Added — EEBO-TCP 도입 + vermigli OCR 손상 근본 해결 (Step 5 ①)
