@@ -2,6 +2,31 @@
 
 이 프로젝트의 주요 변경 사항을 기록한다. (이전 변경은 git 로그 참조)
 
+## [0.8.0] - 2026-05-20
+
+### Added — wesley 정본 회복 (Step 5 ①, Class B 해소)
+
+stub 책 3종(`sermons.txt`/`christian_perfection.txt`/`journal_vol1.txt`,
+각 28KB CCEL Work Info HTML stub) 을 CCEL cache plain text 엔드포인트
+의 정본으로 교체했다. 모두 Public Domain.
+
+- `https://ccel.org/ccel/w/wesley/sermons/cache/sermons.txt` — 4.0MB
+- `https://ccel.org/ccel/w/wesley/perfection/cache/perfection.txt` — 0.2MB
+- `https://ccel.org/ccel/w/wesley/journal/cache/journal.txt` — 0.94MB
+  (실질 일지 전체 합본, 파일명은 기존 키 유지 `journal_vol1.txt`)
+- 기존 stub 은 `*.ccel_stub_legacy.html` 로 백업 (삭제 X).
+- `data/metadata/wesley.yaml`: 3개 work 항목에 edition/source/license/note
+  추가, 기존 `sermons_vol2`/`earnest_appeal` 은 유지.
+
+### Changed — wesley 재인제스트로 본문 회복
+
+- 1,921 → **12,407 청크** (+10,486, 6.5배).
+- 측정 v5 (`docs/data_quality_audit_2026-05-20_v5.md`): junk % 0.0 유지,
+  ocr % 0.9 → 8.7 증가는 CCEL 정본의 그리스어/라틴어 인용·각주·메타
+  헤더에 따른 측정 휴리스틱 산물(검색 품질 무해).
+- 잔여 상위 오염: confessions 3.4%, kierkegaard 3.3%, edwards 3.2%,
+  luther 2.6% — 모두 Class A(재인제스트로 해소 가능).
+
 ## [0.7.0] - 2026-05-20
 
 ### Changed — bunyan 재인제스트 (Step 5 ④, 누락 보정)

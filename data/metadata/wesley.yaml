@@ -8,12 +8,24 @@ works:
 - file: sermons.txt
   title: Sermons on Several Occasions (설교집)
   year: 1771
+  edition: "CCEL cache plain text (1872 Jackson Works 기준 ed.)"
+  source: "https://ccel.org/ccel/w/wesley/sermons/cache/sermons.txt"
+  license: Public Domain
+  note: "CCEL 정본 4.0MB. 기존 동명 파일은 CCEL Work Info HTML stub(28KB)으로 잘못 받혔던 것 → sermons.ccel_stub_legacy.html 백업."
 - file: christian_perfection.txt
   title: A Plain Account of Christian Perfection (완전 성화)
   year: 1766
+  edition: "CCEL cache plain text"
+  source: "https://ccel.org/ccel/w/wesley/perfection/cache/perfection.txt"
+  license: Public Domain
+  note: "CCEL 정본 0.2MB. 기존 동명 파일은 CCEL Work Info HTML stub(28KB) → christian_perfection.ccel_stub_legacy.html 백업."
 - file: journal_vol1.txt
-  title: Journal Vol.1 (일지)
+  title: Journal of John Wesley (일지)
   year: 1735
+  edition: "CCEL cache plain text (Chicago: Moody Press, 1951 인쇄본 기준)"
+  source: "https://ccel.org/ccel/w/wesley/journal/cache/journal.txt"
+  license: Public Domain
+  note: "CCEL 정본 0.94MB — 사실상 일지 전체 합본(파일명은 기존 키 유지). 기존 동명 파일은 CCEL Work Info HTML stub(28KB) → journal_vol1.ccel_stub_legacy.html 백업."
 - file: sermons_vol2.txt
   title: Works Vol.4 - Sermons on Several Occasions (설교집 2)
   year: 1771
