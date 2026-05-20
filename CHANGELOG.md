@@ -2,6 +2,33 @@
 
 이 프로젝트의 주요 변경 사항을 기록한다. (이전 변경은 git 로그 참조)
 
+## [0.10.0] - 2026-05-21
+
+### Changed — Class A 2차 11개 일괄 재인제스트 (Step 5 ③ 2nd round)
+
+v6 잔여 junk ≥ 0.5% 11개 컬렉션(whitefield · anselm · francis ·
+john_damascus · basil · baxter · knox · rutherford · ambrose · eckhart ·
+julian_norwich) 을 일괄 재인제스트. 코드 변경 없이 Step 2 누락 보정.
+
+- 11개 모두 **정확히 0.0% 로 해소**:
+    whitefield 1.7→0.0, anselm 1.4→0.0, francis 1.3→0.0,
+    john_damascus 1.0→0.0, basil 1.0→0.0, baxter 0.9→0.0,
+    knox 0.9→0.0, rutherford 0.9→0.0, ambrose 0.7→0.0,
+    eckhart 0.5→0.0, julian_norwich 0.5→0.0
+- 총 청크 607,137 → 606,511 (-626, strip 자연 감소).
+
+### Notes — 새 발견: bernard 1.6% (CCEL header/footer 패턴)
+
+v7 새 상위 1위 bernard 1.6%. 표본 분석 결과 strip 이 잡지 못하는
+**CCEL 헤더(`Title:`/`Creator(s):`/`LC Call no:` 등 메타 블록) + 푸터
+(`References` + `file:///ccel/.../cache/...html` URL 리스트)** 가 청크에
+실려 있다. `_JUNK_RE` 의 `Christian Classics Ethereal Library` 가 일부
+청크는 잡지만 메타 라인 다수는 매치 안 됨 — **strip 코드 보강 후보**.
+aquinas 0.4% 도 동일 패턴(Gutenberg 헤더 메타 + ELECTRONIC EDITION
+노트).
+
+측정 v7: `docs/data_quality_audit_2026-05-21_v7.md`.
+
 ## [0.9.0] - 2026-05-21
 
 ### Changed — Class A 7개 일괄 재인제스트 (Step 5 ③, Step 2 누락 보정)
