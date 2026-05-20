@@ -2,6 +2,36 @@
 
 이 프로젝트의 주요 변경 사항을 기록한다. (이전 변경은 git 로그 참조)
 
+## [0.5.0] - 2026-05-20
+
+### Added — 데이터 품질 감사 v2 (Step 4 재측정)
+
+- `docs/data_quality_audit_2026-05-20.md`: Step 2(strip 단일 출처 통합,
+  커밋 `da11213`) + Step 3(junk>5% 4개 컬렉션 재인제스트) 효과를 v1
+  동일 스크립트·동일 정의로 재측정. 전수 스캔 599,435 청크 / 58 컬렉션.
+
+### Changed — junk>5% 4개 컬렉션 임계값 아래로 진입
+
+ingest 에 strip 적용 후 재인제스트한 결과 (청크 데이터만 갱신, 코드
+변경 없음):
+
+| 컬렉션 | v1 junk % | v2 junk % | Δ |
+|---|--:|--:|--:|
+| murray | 9.3 | 0.2 | -9.1pp |
+| wesley | 7.5 | 0.0 | -7.5pp |
+| zinzendorf | 6.4 | 0.0 | -6.4pp |
+| watts | 5.2 | 0.0 | -5.2pp |
+
+### Notes — 잔여 과제(이번 범위 밖, 별도 결정 대기)
+
+- vermigli 4.2% 가 새 상위 1위 (OCR long-s 디지털화 잡음 — strip 무효
+  Class C)
+- wesley = Class B: HTML stub 으로 받힌 책 3종(`sermons.txt`,
+  `christian_perfection.txt`, `journal_vol1.txt`)은 junk 는 없어졌지만
+  실본문 결손 — Gutenberg 정본 재취득 필요
+- zinzendorf · watts = Class C: 청크 잡음 0% 라도 OCR 손상(long-s ſ,
+  단어 깨짐) 잔존 — 더 나은 스캔 소스 필요/수용 결정
+
 ## [0.4.0] - 2026-05-19
 
 ### Added — 교부 6명 추가 (51 → 57, "교부 시대" 대폭 확대)
