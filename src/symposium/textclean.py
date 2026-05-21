@@ -33,6 +33,7 @@ _JUNK_RE = re.compile(
     r"|VIEWNAME|workSection"
     r"|Christian Classics Ethereal Library"
     r"|The Reformed Reader"
+    r"|file:///ccel/"
     r"|https?://",
     re.I,
 )
@@ -68,6 +69,74 @@ def _drop_boilerplate_lines(text: str) -> str:
     return "\n".join(kept)
 
 
+_UNDERSCORE_RE = re.compile(r"^\s*_{30,}\s*$")
+_CCEL_REF_URL_RE = re.compile(r"^\s*\d+\.\s+file:///ccel/")
+# CCEL 자동생성 색인 블록 헤더 (본문 뒤 푸터)
+_CCEL_FOOTER_HEAD_RE = re.compile(
+    r"^\s*(Indexes|Index of Scripture References|Index of Citations"
+    r"|Index of Pages|Index of Names|Index of Subjects"
+    r"|Scripture Index|Greek Words and Phrases|Hebrew Words and Phrases)\s*$",
+    re.I,
+)
+# CCEL 푸터 직전의 책 자체 back matter(서지·일반 색인). 후반부에서만 푸터로 인정.
+# bonaventure/minds_road_to_god.txt 는 'SELECTED BIBLIOGRAPHY'가 482/1941(25%)
+# 의 프론트매터(역자 서문)라 전역 매칭 시 본문이 통째로 파괴됨 → 위치 게이트 필수.
+_CCEL_BACKMATTER_RE = re.compile(r"^\s*((SELECTED\s+)?BIBLIOGRAPHY|Index of .+)\s*$", re.I)
+
+
+def _strip_ccel_cache(lines: list[str]) -> str:
+    """CCEL cache plain text 헤더/푸터 제거.
+
+    구조:
+      ___________________   ← 첫 underscore 구분선
+      Title: …
+      Creator(s): …
+      CCEL Subjects: …      ← 메타블록
+      ...
+      ___________________   ← 두 번째 underscore 구분선 (본문 시작 직전)
+      본문 …
+      ___________________   ← 마지막 underscore (선택)
+      This document is from the Christian Classics Ethereal Library …
+      References
+       1. file:///ccel/…    ← 푸터 URL 리스트
+
+    헤더: 처음 두 underscore 사이를 메타블록으로 보고 그 뒤부터 본문.
+    푸터: 'This document is from the Christian Classics' 또는 References+file:///ccel/
+    URL 블록 시작점에서 절단.
+    """
+    n = len(lines)
+    underscore_idx = [i for i, l in enumerate(lines) if _UNDERSCORE_RE.match(l)]
+
+    # 헤더 슬라이싱: 첫 두 underscore 가 책의 앞 1/3 안에 있을 때만 메타블록으로 해석
+    # (책 안의 구분선 underscore 와 구분)
+    body_start = 0
+    if len(underscore_idx) >= 2 and underscore_idx[1] < max(50, n // 3):
+        body_start = underscore_idx[1] + 1
+    elif len(underscore_idx) >= 1 and underscore_idx[0] < max(20, n // 10):
+        body_start = underscore_idx[0] + 1
+
+    body_end = n
+
+    # 푸터 시작점: CCEL 색인 블록('Indexes'/'Index of …') · ThML notice ·
+    # References+file:///ccel/ URL 리스트 중 본문에서 가장 먼저 나오는 마커.
+    # 그 위 underscore 구분선까지 통째로 절단(색인 헤더 위 구분선 포함).
+    for i in range(body_start, n):
+        low_i = lines[i].lower()
+        if (_CCEL_FOOTER_HEAD_RE.match(lines[i])
+                or "this document is from the christian classics" in low_i
+                or _CCEL_REF_URL_RE.match(lines[i])
+                or (i > n // 2 and _CCEL_BACKMATTER_RE.match(lines[i]))):
+            cut = i
+            for j in range(i, body_start, -1):
+                if _UNDERSCORE_RE.match(lines[j]):
+                    cut = j
+                    break
+            body_end = cut
+            break
+
+    return "\n".join(lines[body_start:body_end]).strip()
+
+
 def strip_web_chrome(raw: str) -> str:
     """소스 사이트 boilerplate(네비게이션·푸터)를 제거해 본문만 남긴다.
 
@@ -87,6 +156,13 @@ def strip_web_chrome(raw: str) -> str:
             body = "\n".join(lines[s + 1:e]).strip()
             body = _cut_at(body, r"This text was converted|Project Wittenberg|Walther Library")
             return _drop_boilerplate_lines(body)
+
+    # 1b) CCEL cache plain text: '___...___' 구분선 + 'CCEL Subjects:' 메타 블록
+    # (Schaff HTML 출처와 구분 — cache 는 plain text 라 'Prev/Next' 브레드크럼 없음)
+    if "ccel subjects:" in low or (
+        "this document is from the christian classics ethereal library" in low
+    ):
+        return _drop_boilerplate_lines(_strip_ccel_cache(lines))
 
     # 2) CCEL Schaff: 앞뒤 "« Prev … Next »" 브레드크럼 / 푸터 사이
     if "christian classics ethereal library" in low or "creeds of christendom" in low:

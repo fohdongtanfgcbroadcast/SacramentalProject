@@ -2,6 +2,34 @@
 
 이 프로젝트의 주요 변경 사항을 기록한다. (이전 변경은 git 로그 참조)
 
+## [0.11.0] - 2026-05-22
+
+### Fixed — CCEL cache back matter strip 보완 (aquinas/nature_and_grace)
+
+`textclean._strip_ccel_cache` 의 CCEL 푸터 컷이 CCEL 자동 `Indexes`
+블록만 절단하고, 그 **앞**에 위치한 책 자체 back matter(서지 목록·일반
+색인)는 본문에 남기던 문제를 보완.
+
+- `_CCEL_BACKMATTER_RE` 추가: 전체 라인 `(SELECTED )?BIBLIOGRAPHY` ·
+  `Index of …`. **위치 게이트 `i > n//2`** 로 후반부에서만 푸터로 인정.
+  (bonaventure/minds_road_to_god 는 `SELECTED BIBLIOGRAPHY` 가
+  482/1941≈25% 의 프론트매터[역자 서문]라 전역 매칭 시 본문 파괴 → 게이트 필수.)
+- 7개 CCEL 소스 회귀 어서션 PASS: 6개 strip 출력 byte 동일,
+  aquinas/nature_and_grace 만 -27,845자(`BIBLIOGRAPHY`·`Index of
+  References to Other Authors and Sources` 색인 제거).
+
+### Changed — bernard · aquinas · bonaventure 재인제스트
+
+CCEL strip(분기 1b) + 위 보완 반영을 위해 3개 author 재인제스트.
+현재 로컬 코퍼스 측정(`docs/data_quality_audit_2026-05-22.md`) 기준 junk:
+
+- bernard 2,254청크 → **0.0%**
+- aquinas 39,283청크 → **0.0%**
+- bonaventure 5,152청크 → **0.0%**
+
+검증 방식: claude·codex·gemini 3개 CLI 병렬 교차검증(읽기전용)으로
+strip 로직 확인 후 보완·재인제스트.
+
 ## [0.10.0] - 2026-05-21
 
 ### Changed — Class A 2차 11개 일괄 재인제스트 (Step 5 ③ 2nd round)
