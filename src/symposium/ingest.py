@@ -159,13 +159,31 @@ def ingest_author(author: str, data_root: Path, metadata_path: Path, chroma_dir:
     model = SentenceTransformer(EMBEDDING_MODEL)
 
     client = chromadb.PersistentClient(path=str(chroma_dir))
-    collection = client.get_or_create_collection(author, metadata={"hnsw:space": "cosine"})
 
     # macOS APFS/HFS+ 유니코드 정규화(NFD) 대응: 파일명 인덱스 구축
     _fs_files: dict[str, Path] = {}
     if raw_dir.exists():
         for p in raw_dir.iterdir():
             _fs_files[unicodedata.normalize("NFC", p.name)] = p
+
+    # 가드: 유효한(실재하는) 소스 파일이 하나도 없으면 기존 컬렉션을 보존하고 중단한다.
+    # (깨진 심볼릭 링크 등으로 0 청크가 되어 기존 데이터를 날리는 사고 방지)
+    valid_files = [w for w in works
+                   if (_fs_files.get(w["file"]) or raw_dir / w["file"]).exists()]
+    if not valid_files:
+        raise SystemExit(
+            f"[중단] {author}: 유효한 소스 파일이 없습니다(깨진 링크/누락). "
+            f"기존 컬렉션을 보존합니다."
+        )
+
+    # 재인제스트 시 기존 컬렉션을 비우고 재생성한다. get_or_create + upsert 만으로는
+    # strip 으로 텍스트가 짧아져 가상 페이지 수가 줄면 옛 뒷페이지 청크가 ID 충돌 없이
+    # 고아로 잔존(예: CCEL footer References 구간이 junk 로 남음)하므로 반드시 삭제 후 재생성.
+    try:
+        client.delete_collection(author)
+    except Exception:
+        pass
+    collection = client.create_collection(author, metadata={"hnsw:space": "cosine"})
 
     total_added = 0
     for work in works:

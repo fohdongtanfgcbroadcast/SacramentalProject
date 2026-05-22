@@ -2,6 +2,34 @@
 
 이 프로젝트의 주요 변경 사항을 기록한다. (이전 변경은 git 로그 참조)
 
+## [0.12.0] - 2026-05-22
+
+### Fixed — 재인제스트 고아 청크 + 빈 컬렉션 사고 방지 (ingest.py)
+
+**근본 원인**: `ingest_author` 가 `get_or_create_collection` + `upsert` 만
+사용. 청크 ID 는 `{author}:{file}:{chunk_idx}:p{가상페이지}` 인데, strip 으로
+텍스트가 짧아지면 가상 페이지 수가 줄어 **옛 인제스트의 뒷페이지 청크가 ID
+충돌 없이 고아로 잔존**. 그 뒷페이지가 CCEL footer References(`file:///ccel/…`)
+구간이라 junk 로 측정됨. (anselm 측정 2,758 vs 재인제스트 로그 2,392 — 차이
+366개가 고아. junk 청크 page 185~197 > 새 페이지수 182 로 실증.)
+
+- **삭제 후 재생성**: 재인제스트 시 기존 컬렉션을 `delete_collection` 후
+  `create_collection`. 고아 청크 원천 차단.
+- **빈 컬렉션 가드**: 유효한(실재) 소스 파일이 0개면 `SystemExit` 으로 중단,
+  기존 컬렉션 보존. (moltmann raw 가 SecramentalProject 로의 깨진 심볼릭
+  링크 → 0 청크로 컬렉션이 비는 사고 방지. 가드로 재발 차단.)
+
+### Changed — junk>0 14개 재인제스트로 고아 junk 정리
+
+anselm 8.6→0.0, eckhart 6.9→0.0, john_damascus 6.7→0.0, julian_norwich
+3.8→0.0, wesley 2.8→0.0, luther 1.4→0.0, knox 1.4→0.0 (전부 0.0%).
+moltmann 은 깨진 링크로 재인제스트 불가 → `data/processed/moltmann/*.jsonl`
+(이전 청크 12,114개)에서 재임베딩으로 복원.
+
+- 현재 로컬 코퍼스: **58 컬렉션 / 567,448 청크**, junk 0.0% 51개.
+  잔여 junk ≤0.3%(confessions 0.3%, murray·cyril_jerusalem·moltmann 0.2%,
+  kuyper·schweitzer·harnack 0.1%) — 다른 패턴 소량, 후속 과제.
+
 ## [0.11.0] - 2026-05-22
 
 ### Fixed — CCEL cache back matter strip 보완 (aquinas/nature_and_grace)
