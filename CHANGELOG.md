@@ -2,6 +2,61 @@
 
 이 프로젝트의 주요 변경 사항을 기록한다. (이전 변경은 git 로그 참조)
 
+## [0.14.0] - 2026-07-08
+
+### Security/Hardening — 자체 하드닝 (보안 감사 Phase 0C Track A, 사용자 승인)
+
+로컬 전용 유지(외부 재노출 안 함) 결정에 따른 Symposium 자체 남용 방어선. 전 항목
+TDD(회귀 테스트 15개 추가, `tests/`).
+
+- **입력 제약**: `top_k` → `Field(ge=1, le=20)`, query/message 등 문자열 `max_length`.
+  거대 top_k로 인한 대량 Chroma 쿼리·프롬프트 증폭 차단.
+- **요청 본문 크기 제한**: 미들웨어에서 Content-Length 256KB 초과 시 413.
+- **보안 응답 헤더**: 전 응답에 CSP(`default-src 'self'`…) + `X-Content-Type-Options`
+  + `X-Frame-Options: DENY` + `Referrer-Policy` (XSS/클릭재킹 심층방어).
+- **정적 XSS 교정**: `app.js`에 `escapeHtml` 추가·적용, `symposium.js` 신학자
+  목록/추천질문 본문의 미이스케이프 innerHTML 싱크 교정.
+- **세션 하드닝**(`session.py`): 유휴 TTL(6h) + 최대 세션 수(500, LRU 축출) +
+  히스토리 상한(40) + 고엔트로피 세션 ID(`secrets.token_urlsafe`, 기존 48비트→~144비트).
+  메모리 무한 증가·세션 열거 위험 완화.
+- **전역 락 DoS 완화**(`_call_claude`): 락 대기자 상한(8) 초과 시 429, claude 타임아웃
+  120s→60s, 타임아웃 시 `proc.kill()`로 좀비 프로세스(구독 요금 지속 소모) 회수.
+- **경로 이탈 방어**: `/api/confession-text/{filename}`에 `_confession_path` 격리
+  검증(resolve 후 부모 디렉터리 일치 강제). 프레임워크 라우팅 의존 제거.
+- **예외 원문 유출 차단**: `/api/search`·`/api/ask`의 `detail=str(e)` 및 claude
+  stderr 반환 제거 → 일반 메시지 + 서버 로깅.
+- **관리 표면 축소**: `/docs`·`/redoc`·`/openapi.json` 비활성.
+- **레거시 제거**: 미사용 `generate.py`(anthropic API 경로) 삭제 + `.env.example`의
+  `ANTHROPIC_API_KEY` 제거. 미사용 import(`subprocess`·`unicodedata`) 정리.
+- **테스트 인프라**: pyproject `[project.optional-dependencies] test` +
+  `[tool.pytest.ini_options]`, `tests/`(conftest + 15 테스트) 신설.
+
+### 남은 후속(별도 승인 필요)
+- Phase 0C Track B(Alexandria 게이트 뒤 재노출)는 "로컬 전용 유지" 결정으로 보류.
+- 데이터 연동(canon.db 교차참조) P1~P3은 감사 보고서 로드맵 참조.
+
+## [0.13.0] - 2026-07-07
+
+### Security — 긴급 격리 (보안 감사 Phase 0A/0B, 사용자 승인)
+
+`docs/security/SECURITY_AUDIT_AND_INTEGRATION_2026-07-07.md` 감사에서 확인된
+활성 Critical 3건(무인증 공개 노출 · 구독요금 도난/DoS · 프롬프트 인젝션→RCE)에
+대한 즉시 격리.
+
+- **공개 노출 차단**: `com.symposium.tunnel`(cloudflared quick tunnel) 언로드로
+  `*.trycloudflare.com` 무인증 공개 URL 제거.
+- **loopback 바인딩**: `serve.py`와 `com.symposium.server.plist`의
+  `0.0.0.0` → `127.0.0.1`. LAN/Tailscale 직접 노출 차단(파일시스템 페더레이션은
+  무영향). 향후 공개는 인증 게이트(Alexandria require_approved 프록시) 경유만.
+- **RCE 근절**: `_call_claude`의 `claude --print` 호출에 `--tools ""` 추가.
+  전역 `~/.claude/settings.json`(defaultMode=bypassPermissions + allow=Bash/Edit/…)을
+  상속해 프롬프트 인젝션이 호스트 셸 실행으로 이어지던 경로를 구조적으로 차단.
+  신학 답변은 순수 텍스트 생성이라 도구 불필요(실증 검증 완료).
+
+### 남은 후속(별도 승인 필요)
+- 인증 게이트 편입(Phase 0C), 레이트리밋·세션 TTL·top_k 상한, XSS/CSP 등은
+  감사 보고서 Phase 0C 이후 로드맵 참조.
+
 ## [0.12.0] - 2026-05-22
 
 ### Fixed — 재인제스트 고아 청크 + 빈 컬렉션 사고 방지 (ingest.py)

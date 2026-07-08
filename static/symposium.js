@@ -102,13 +102,13 @@ function renderTheologianList() {
       </div>`;
     for (const a of authors) {
       html += `
-      <label class="theologian-check-item" data-key="${a.key}">
-        <input type="checkbox" value="${a.key}">
+      <label class="theologian-check-item" data-key="${escapeAttr(a.key)}">
+        <input type="checkbox" value="${escapeAttr(a.key)}">
         <span class="theologian-check-avatar" style="background:${era.color}18;color:${era.color}">
           <span class="avatar-shape shape-${era.shape}"></span>
         </span>
-        <span class="theologian-check-name">${a.name_ko}</span>
-        <span class="theologian-check-works">${a.work_count}권</span>
+        <span class="theologian-check-name">${escapeHtml(a.name_ko)}</span>
+        <span class="theologian-check-works">${escapeHtml(a.work_count)}권</span>
       </label>`;
     }
     // 해당 시대 신앙고백서 (교부 시대 제외)
@@ -118,8 +118,8 @@ function renderTheologianList() {
         const shortTitle = c.title.split(" — ")[0];
         html += `
         <div class="confession-item">
-          <span class="confession-name">${shortTitle}</span>
-          <span class="confession-year">${c.year}</span>
+          <span class="confession-name">${escapeHtml(shortTitle)}</span>
+          <span class="confession-year">${escapeHtml(c.year)}</span>
         </div>`;
       }
     }
@@ -174,7 +174,7 @@ btnStart.addEventListener("click", async () => {
       recommendations.innerHTML =
         '<div class="rec-label">추천 질문</div>' +
         data.recommended_questions.map(q =>
-          `<button type="button" class="rec-btn" data-q="${escapeAttr(q)}">${q}</button>`
+          `<button type="button" class="rec-btn" data-q="${escapeAttr(q)}">${escapeHtml(q)}</button>`
         ).join("");
       recommendations.classList.remove("hidden");
       recommendations.querySelectorAll(".rec-btn").forEach(btn => {

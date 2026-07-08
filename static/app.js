@@ -1,3 +1,13 @@
+// 서버/데이터 유래 문자열을 innerHTML에 넣기 전 HTML 이스케이프 (저장형 XSS 심층방어)
+function escapeHtml(s) {
+  return String(s == null ? "" : s)
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#39;");
+}
+
 const TOPICS = [
   { name: "삼위일체론", desc: "성부·성자·성령의 관계" },
   { name: "기독론", desc: "그리스도의 인격과 사역" },
@@ -62,8 +72,8 @@ async function renderTheologians() {
               <div class="avatar-shape shape-${era.shape}"></div>
             </div>
             <div class="theologian-info">
-              <div class="theologian-name">${a.name_ko}</div>
-              <div class="theologian-works">${a.tradition || ''}</div>
+              <div class="theologian-name">${escapeHtml(a.name_ko)}</div>
+              <div class="theologian-works">${escapeHtml(a.tradition || '')}</div>
             </div>
           </a>`;
       }
@@ -85,9 +95,9 @@ async function renderConfessions() {
       const shortTitle = c.title.split(" — ")[0];
       return `
       <a href="/symposium?confession=${encodeURIComponent(c.file)}&confession_name=${encodeURIComponent(shortTitle)}" class="confession-card">
-        <div class="confession-card-year">${c.year}</div>
-        <div class="confession-card-name">${shortTitle}</div>
-        <div class="confession-card-tradition">${c.tradition}</div>
+        <div class="confession-card-year">${escapeHtml(c.year)}</div>
+        <div class="confession-card-name">${escapeHtml(shortTitle)}</div>
+        <div class="confession-card-tradition">${escapeHtml(c.tradition)}</div>
       </a>`;
     }).join("");
   } catch (e) {

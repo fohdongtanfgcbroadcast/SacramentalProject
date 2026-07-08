@@ -3,29 +3,69 @@ from __future__ import annotations
 
 import asyncio
 import json
-import subprocess
-import unicodedata
+import logging
 from functools import lru_cache
 from pathlib import Path
 
-from fastapi import FastAPI, HTTPException
-from fastapi.responses import FileResponse
+from fastapi import FastAPI, HTTPException, Request
+from fastapi.responses import FileResponse, JSONResponse
 from fastapi.staticfiles import StaticFiles
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 from sse_starlette.sse import EventSourceResponse
 
 from symposium.config import CHROMA_DIR, METADATA_DIR
 from symposium.retrieve import search
 from symposium.session import create_session, get_session, add_message
 
+logger = logging.getLogger("symposium")
+
 PROJECT_ROOT = Path(__file__).resolve().parent.parent.parent
 STATIC_DIR = PROJECT_ROOT / "static"
+CONFESSIONS_DIR = (PROJECT_ROOT / "data" / "raw" / "confessions").resolve()
 
-app = FastAPI(title="Symposium", version="0.2.0")
+# 요청 본문 크기 상한(256KB) — 대형 페이로드로 인한 메모리/프롬프트 증폭 방지
+MAX_BODY_BYTES = 256 * 1024
+
+# 대화형 API 문서(/docs·/redoc·/openapi.json)는 비활성 — 스키마 정찰 표면 축소
+app = FastAPI(title="Symposium", version="0.14.0",
+              docs_url=None, redoc_url=None, openapi_url=None)
 app.mount("/static", StaticFiles(directory=str(STATIC_DIR)), name="static")
+
+
+@app.middleware("http")
+async def _security_middleware(request: Request, call_next):
+    # 요청 본문 크기 제한(선언된 Content-Length 기준)
+    cl = request.headers.get("content-length")
+    if cl is not None:
+        try:
+            too_big = int(cl) > MAX_BODY_BYTES
+        except ValueError:
+            return JSONResponse({"detail": "잘못된 Content-Length."}, status_code=400)
+        if too_big:
+            return JSONResponse({"detail": "요청 본문이 너무 큽니다."}, status_code=413)
+    response = await call_next(request)
+    # 보안 응답 헤더(심층방어). 인라인 스크립트 없음 → script-src 'self'.
+    # script-src 'self'(인라인 스크립트/이벤트핸들러 차단=핵심 XSS 방어)는 엄격 유지.
+    # style-src 는 UI가 동적 인라인 style 속성(era 색상 등)을 쓰므로 'unsafe-inline' 허용
+    # (스타일은 JS 실행 불가라 위험 낮음). Pretendard 폰트는 jsdelivr(→fastly 리다이렉트) 허용.
+    response.headers["Content-Security-Policy"] = (
+        "default-src 'self'; script-src 'self'; "
+        "style-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net https://fastly.jsdelivr.net; "
+        "font-src 'self' https://cdn.jsdelivr.net https://fastly.jsdelivr.net; "
+        "connect-src 'self'; img-src 'self' data:; object-src 'none'; "
+        "base-uri 'none'; frame-ancestors 'none'"
+    )
+    response.headers["X-Content-Type-Options"] = "nosniff"
+    response.headers["X-Frame-Options"] = "DENY"
+    response.headers["Referrer-Policy"] = "no-referrer"
+    return response
+
 
 # claude CLI 동시 실행 방지 — 순차 처리 큐
 _claude_lock = asyncio.Lock()
+# 락 대기자 상한 — 초과 시 429(전역 락 무한 적체·워커 아사 방지)
+_MAX_CLAUDE_WAITERS = 8
+_claude_waiters = 0
 
 SYSTEM_INSTRUCTION = (
     "당신은 기독교 조직신학 전문 연구 조수입니다. "
@@ -57,15 +97,15 @@ THEOLOGIAN_SYSTEM_TEMPLATE = (
 # --- Models ---
 
 class SearchRequest(BaseModel):
-    query: str
-    author: str = "moltmann"
-    top_k: int = 5
+    query: str = Field(..., max_length=2000)
+    author: str = Field("moltmann", max_length=100)
+    top_k: int = Field(5, ge=1, le=20)
 
 
 class AskRequest(BaseModel):
-    question: str
-    author: str = "moltmann"
-    top_k: int = 5
+    question: str = Field(..., max_length=2000)
+    author: str = Field("moltmann", max_length=100)
+    top_k: int = Field(5, ge=1, le=20)
 
 
 class AuthorInfo(BaseModel):
@@ -77,19 +117,19 @@ class AuthorInfo(BaseModel):
 
 
 class SymposiumStartRequest(BaseModel):
-    theologians: list[str]
-    topic: str = ""
-    confession: str = ""  # 신앙고백서 파일명
-    confession_name: str = ""  # 한국어 제목
+    theologians: list[str] = Field(..., max_length=5)
+    topic: str = Field("", max_length=200)
+    confession: str = Field("", max_length=200)  # 신앙고백서 파일명
+    confession_name: str = Field("", max_length=200)  # 한국어 제목
 
 class SymposiumAskRequest(BaseModel):
-    session_id: str
-    message: str
+    session_id: str = Field(..., max_length=64)
+    message: str = Field(..., max_length=4000)
 
 class SymposiumDirectRequest(BaseModel):
-    session_id: str
-    message: str
-    target: str
+    session_id: str = Field(..., max_length=64)
+    message: str = Field(..., max_length=4000)
+    target: str = Field(..., max_length=100)
 
 
 # --- Glossary ---
@@ -249,23 +289,49 @@ def _load_recommended_questions() -> dict:
         return json.load(f)
 
 
+_CLAUDE_TIMEOUT = 60  # claude 호출 상한(초) — 워커 장기 점유 방지
+
+
 async def _call_claude(prompt: str) -> str:
     """claude CLI를 subprocess로 호출하여 답변 생성."""
-    async with _claude_lock:
-        proc = await asyncio.create_subprocess_exec(
-            "claude", "--print",
-            stdin=asyncio.subprocess.PIPE,
-            stdout=asyncio.subprocess.PIPE,
-            stderr=asyncio.subprocess.PIPE,
-        )
-        stdout, stderr = await asyncio.wait_for(
-            proc.communicate(input=prompt.encode("utf-8")),
-            timeout=120,
-        )
-        if proc.returncode != 0:
-            err = stderr.decode("utf-8", errors="replace")
-            raise HTTPException(status_code=502, detail=f"Claude CLI 오류: {err[:500]}")
-        return stdout.decode("utf-8").strip()
+    global _claude_waiters
+    # 락 대기자 상한: 전역 락이 이미 한도만큼 적체돼 있으면 즉시 429(무한 큐잉·워커 아사 방지)
+    if _claude_waiters >= _MAX_CLAUDE_WAITERS:
+        raise HTTPException(status_code=429, detail="서버가 혼잡합니다. 잠시 후 다시 시도하세요.")
+    _claude_waiters += 1
+    try:
+        async with _claude_lock:
+            # 보안: --tools "" 로 도구를 구조적으로 비활성화한다. 전역 ~/.claude/settings.json 이
+            # defaultMode=bypassPermissions + allow=[Bash(*)/Edit(*)/...] 이므로, 이 플래그가 없으면
+            # 사용자 입력(프롬프트 인젝션)이 호스트 셸 실행(RCE)으로 이어진다. 신학 답변은 순수 텍스트
+            # 생성이라 도구가 불필요하다. (실증: 플래그 없으면 양성 프롬프트로도 파일 생성됨)
+            proc = await asyncio.create_subprocess_exec(
+                "claude", "--print", "--tools", "",
+                stdin=asyncio.subprocess.PIPE,
+                stdout=asyncio.subprocess.PIPE,
+                stderr=asyncio.subprocess.PIPE,
+            )
+            try:
+                stdout, stderr = await asyncio.wait_for(
+                    proc.communicate(input=prompt.encode("utf-8")),
+                    timeout=_CLAUDE_TIMEOUT,
+                )
+            except asyncio.TimeoutError:
+                # 타임아웃 시 좀비 프로세스가 백그라운드에서 구독 요금제를 계속 소모하지 않도록 회수
+                proc.kill()
+                try:
+                    await proc.wait()
+                except Exception:
+                    pass
+                logger.warning("claude 호출 타임아웃(%ss) — 프로세스 종료", _CLAUDE_TIMEOUT)
+                raise HTTPException(status_code=504, detail="응답 생성 시간 초과")
+            if proc.returncode != 0:
+                err = stderr.decode("utf-8", errors="replace")
+                logger.error("claude CLI 오류(rc=%s): %s", proc.returncode, err[:500])
+                raise HTTPException(status_code=502, detail="응답 생성에 실패했습니다.")
+            return stdout.decode("utf-8").strip()
+    finally:
+        _claude_waiters -= 1
 
 
 # --- Routes ---
@@ -311,8 +377,9 @@ async def list_confessions():
 async def api_search(req: SearchRequest):
     try:
         hits = search(req.query, req.author, CHROMA_DIR, top_k=req.top_k)
-    except Exception as e:
-        raise HTTPException(status_code=404, detail=str(e))
+    except Exception:
+        logger.exception("검색 실패 (author=%s)", req.author)
+        raise HTTPException(status_code=404, detail="검색 결과를 찾을 수 없습니다.")
     return {
         "query": req.query,
         "author": req.author,
@@ -333,8 +400,9 @@ async def api_search(req: SearchRequest):
 async def api_ask(req: AskRequest):
     try:
         hits = search(req.question, req.author, CHROMA_DIR, top_k=req.top_k)
-    except Exception as e:
-        raise HTTPException(status_code=404, detail=str(e))
+    except Exception:
+        logger.exception("검색 실패 (author=%s)", req.author)
+        raise HTTPException(status_code=404, detail="검색 결과를 찾을 수 없습니다.")
     if not hits:
         raise HTTPException(status_code=404, detail="검색 결과 없음")
 
@@ -363,19 +431,31 @@ async def symposium_page():
     return FileResponse(str(STATIC_DIR / "symposium.html"))
 
 
+def _confession_path(filename: str) -> Path:
+    """confessions 디렉터리 내부로 한정된 안전 경로 반환. 경로 이탈 시 400.
+
+    프레임워크 라우팅(슬래시 미매칭)에만 의존하지 않고 코드에서 격리 경계를 강제한다:
+    resolve() 후 부모가 정확히 CONFESSIONS_DIR 여야 한다('..'·심볼릭·인코딩 우회 차단).
+    """
+    candidate = (CONFESSIONS_DIR / filename).resolve()
+    if candidate.parent != CONFESSIONS_DIR:
+        raise HTTPException(status_code=400, detail="잘못된 파일명입니다.")
+    return candidate
+
+
 @app.get("/api/confession-text/{filename}")
 async def confession_text(filename: str):
     """신앙고백서 전문 반환. 한글 번역 캐시 우선, 긴 텍스트는 목차만."""
     import re
     from symposium.ingest import extract_text_file, clean_text
 
-    raw_path = PROJECT_ROOT / "data" / "raw" / "confessions" / filename
+    raw_path = _confession_path(filename)
     if not raw_path.exists():
-        raise HTTPException(404, f"{filename} 파일 없음")
+        raise HTTPException(404, "파일을 찾을 수 없습니다.")
 
     # 한글 번역 캐시 확인
     ko_stem = Path(filename).stem
-    ko_path = PROJECT_ROOT / "data" / "raw" / "confessions" / f"{ko_stem}.ko.txt"
+    ko_path = CONFESSIONS_DIR / f"{ko_stem}.ko.txt"
     if ko_path.exists():
         content = ko_path.read_text(encoding="utf-8", errors="replace").strip()
         return {"filename": filename, "text": content, "mode": "full", "lang": "ko"}
