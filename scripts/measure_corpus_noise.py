@@ -10,11 +10,12 @@ _drop_boilerplate_lines 를 쓰지 않는다. 따라서 .ko.txt(한글 표시)�
 정렬: 오염도(junk 청크 비율) 내림차순. 상위 3개 컬렉션은 실제 잡음
 청크 표본 3개를 보고서에 그대로 첨부한다.
 
-사용: .venv/bin/python scripts/measure_corpus_noise.py
-산출: docs/data_quality_audit_<오늘>.md + stdout 요약표
+사용: .venv/bin/python scripts/measure_corpus_noise.py [--suffix v2]
+산출: docs/data_quality_audit_<오늘>[_<suffix>].md + stdout 요약표
 """
 from __future__ import annotations
 
+import argparse
 import re
 import sys
 from datetime import date
@@ -33,11 +34,13 @@ from translate_confessions import (  # noqa: E402
 )
 
 CHROMA_DIR = Path(__file__).resolve().parent.parent / "chroma_db"
-REPORT = (
-    Path(__file__).resolve().parent.parent
-    / "docs"
-    / f"data_quality_audit_{date.today().isoformat()}.md"
-)
+DOCS_DIR = Path(__file__).resolve().parent.parent / "docs"
+
+
+def report_path(suffix: str = "") -> Path:
+    """보고서 경로. suffix 로 같은 날 재실행 시 덮어쓰기 방지 (예: v2 → _v2)."""
+    tail = f"_{suffix}" if suffix else ""
+    return DOCS_DIR / f"data_quality_audit_{date.today().isoformat()}{tail}.md"
 
 PAGE = 5000  # 컬렉션당 페이지네이션 (메모리 상한)
 SHRINK_THRESHOLD = 0.30  # _drop_boilerplate_lines 로 30% 이상 줄면 "심한 오염"
@@ -59,11 +62,24 @@ def is_junk_line(s: str) -> bool:
     return bool(_IA_JUNK.search(s) or _JUNK_RE.search(s))
 
 
+# 알파벳 취급 문자: 라틴 + 한글(음절/자모) + CJK 한자.
+# moltmann 등 한글 본문 컬렉션이 전부 "깨짐"으로 오탐되는 것을 방지.
+# 라틴 외 문자를 좁게 추가만 하므로 기존 영문 컬렉션 측정치는 불변.
+_ALPHA_RE = re.compile(
+    "[A-Za-z"
+    "가-힣"  # 한글 음절
+    "ᄀ-ᇿㄱ-ㆎ"  # 한글 자모
+    "一-鿿"  # CJK 한자 (국한문 혼용)
+    "]"
+)
+
+
 def is_ocr_broken_line(s: str) -> bool:
     """OCR 깨짐 휴리스틱 — strip 로직 범위 밖(별도 축). step 2 범위 아님.
 
-    공백 제외 20자 초과 라인에서 [^A-Za-z] 비율이 50% 초과면 의심.
-    (코퍼스 소스는 대부분 영문 IA/NPNF2/ANCL — .ko.txt 는 별도)
+    공백 제외 20자 초과 라인에서 비알파(라틴·한글·한자 외) 비율이
+    50% 초과면 의심. (코퍼스 소스는 대부분 영문 IA/NPNF2/ANCL,
+    moltmann 은 한글 번역 PDF)
     """
     t = s.strip()
     if len(t) <= 20:
@@ -71,7 +87,7 @@ def is_ocr_broken_line(s: str) -> bool:
     nonspace = re.sub(r"\s", "", t)
     if not nonspace:
         return False
-    nonalpha = len(re.sub(r"[A-Za-z]", "", nonspace))
+    nonalpha = len(_ALPHA_RE.sub("", nonspace))
     return nonalpha / len(nonspace) > OCR_NONALPHA
 
 
@@ -129,6 +145,14 @@ def scan_collection(col) -> dict:
 
 
 def main() -> None:
+    ap = argparse.ArgumentParser(description=__doc__)
+    ap.add_argument(
+        "--suffix",
+        default="",
+        help="보고서 파일명 접미사 — 같은 날 재실행 시 덮어쓰기 방지 (예: v2)",
+    )
+    report = report_path(ap.parse_args().suffix)
+
     client = chromadb.PersistentClient(path=str(CHROMA_DIR))
     cols = client.list_collections()
     print(f"스캔 대상: {len(cols)} 컬렉션\n")
@@ -199,8 +223,8 @@ def main() -> None:
         "(임계값·범위)는 step 2 에서 사용자와 결정한다.\n"
     )
 
-    REPORT.write_text("\n".join(lines) + "\n", encoding="utf-8")
-    print(f"\n보고서 → {REPORT}")
+    report.write_text("\n".join(lines) + "\n", encoding="utf-8")
+    print(f"\n보고서 → {report}")
     print(f"총 {grand:,} 청크 / {len(rows)} 컬렉션")
     top = rows[0]
     print(
