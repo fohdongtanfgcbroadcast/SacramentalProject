@@ -33,4 +33,5 @@ def client(monkeypatch, web_module):
 
     monkeypatch.setattr(web, "search", fake_search)
     monkeypatch.setattr(web, "_call_claude", fake_call_claude)
-    return TestClient(web.app)
+    # 기본 Host=localhost → deny-by-default 게이트의 로컬 무게이트 경로(운영 로컬 접속과 동일)
+    return TestClient(web.app, base_url="http://localhost")

@@ -8,19 +8,15 @@ from rich.table import Table
 from symposium import ingest as _ingest
 from symposium import retrieve as _retrieve
 from symposium.config import CHROMA_DIR, DATA_ROOT, METADATA_DIR
+from symposium.prompts import SYSTEM_INSTRUCTION
 
 app = typer.Typer(add_completion=False, help="Symposium — 신학 문헌 RAG 플랫폼")
 console = Console()
 
 
 def _build_prompt(question: str, hits: list[dict]) -> str:
-    """검색 결과와 질문을 하나의 프롬프트로 조합."""
-    parts = [
-        "당신은 기독교 조직신학 전문 연구 조수입니다. 아래 참고 자료에 근거해 질문에 답하세요.",
-        "각 주장 뒤에 출처를 [저작명, p.페이지] 형식으로 표기하고,",
-        "중요한 신학 용어는 원어(독일어/영어/라틴어)를 병기하세요.\n",
-        "# 참고 자료\n",
-    ]
+    """검색 결과와 질문을 하나의 프롬프트로 조합. 지시문은 web 과 동일한 단일 진실원."""
+    parts = [SYSTEM_INSTRUCTION, "", "# 참고 자료", ""]
     for i, hit in enumerate(hits, 1):
         m = hit["metadata"]
         source = f"[{m.get('title', '?')}, p.{m.get('page', '?')}]"

@@ -15,10 +15,24 @@ def _get_model() -> SentenceTransformer:
     return SentenceTransformer(EMBEDDING_MODEL)
 
 
+@lru_cache(maxsize=1)
+def _get_client(chroma_dir: str):
+    """PersistentClient 재사용 — 호출당 재생성 방지(sqlite 핸들·컬렉션 메타 재로드 절감).
+
+    재인덱싱(ingest)은 별도 프로세스라 서버 프로세스의 캐시와 무관하다.
+    운영 절차: 컬렉션 재인덱싱 후에는 서버를 재시작해야 새 데이터가 반영된다.
+    """
+    return chromadb.PersistentClient(path=chroma_dir)
+
+
+@lru_cache(maxsize=64)
+def _get_collection(chroma_dir: str, author: str):
+    return _get_client(chroma_dir).get_collection(author)
+
+
 def search(query: str, author: str, chroma_dir: Path, top_k: int = 5) -> list[dict]:
     model = _get_model()
-    client = chromadb.PersistentClient(path=str(chroma_dir))
-    collection = client.get_collection(author)
+    collection = _get_collection(str(chroma_dir), author)
     query_embedding = model.encode([query]).tolist()
     result = collection.query(query_embeddings=query_embedding, n_results=top_k)
 

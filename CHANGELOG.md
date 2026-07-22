@@ -2,6 +2,57 @@
 
 이 프로젝트의 주요 변경 사항을 기록한다. (이전 변경은 git 로그 참조)
 
+## [0.16.0] - 2026-07-22
+
+정밀검수(8차원 60에이전트 리뷰 + 적대적 검증, `docs/security/AUDIT_2026-07-22.md`) 대응 —
+취약점·품질·개선 조치 1~4번. 즉시 익스플로잇 취약점은 없었고(게이트·RCE·경로·XSS 견고 재확인),
+RAG 충실도·자원 낭비·인증위생·코드위생을 개선. 신규 회귀 테스트 36개(총 51 pass).
+
+### RAG 답변 신뢰도 (충실도)
+
+- **인용 조작 방지**: 시스템/신학자 프롬프트를 "각 주장 뒤 출처 강제"에서 "발췌에 실제로 근거한
+  주장에만 출처 표기, 없는 내용에 출처를 지어내지 말 것"으로 완화. 무관 발췌 강제 인용 근본 차단.
+- **근거부재 모드**: symposium 검색 실패·빈 결과 시 프롬프트에 "참고 발췌 없음 → 특정 저작·페이지
+  인용 금지" 주입(`_NO_EVIDENCE_NOTE`). `/api/ask` 만 있던 가드의 symposium 경로 비대칭 해소.
+- **저관련 주의**: 최상위 hit cosine distance > `RELEVANCE_SOFT_MAX`(0.55, 실측 캘리브레이션)면
+  "무관하면 인용 말 것" 주의 삽입(`_LOW_RELEVANCE_NOTE`). 하드 필터 대신 소프트 신호로 recall 보존.
+- **용어집 단어경계**: `_find_relevant_terms` 부분문자열 매칭(law→lawn, sin→single, 죄→죄송)을
+  영어 `\b` 정규식 + 한국어 선행경계(조사 결합 허용)로 교체. 오탐 제거·정탐 유지.
+- **용어집 전체 스캔**: 발췌 앞 200자만 보던 것을 전체(800자)로 확대 — 뒤쪽 용어 번역 강제 누락 해소.
+
+### 자원·구독 낭비
+
+- **subprocess 고아 회수**: `_call_claude` 회수 로직을 `finally`로 이동 — 타임아웃뿐 아니라
+  클라이언트 disconnect(취소) 시에도 살아있는 claude 프로세스를 kill. 고아 구독 소모 차단(실증).
+- **SSE disconnect 중단**: `/api/symposium/ask` 루프에 `request.is_disconnected()` 검사 —
+  이탈 시 남은 신학자 호출 중단(구독·락 낭비 방지).
+- **chroma 클라이언트 캐싱**: `retrieve`에 `_get_client`/`_get_collection` lru_cache 추가 —
+  검색 호출당 `PersistentClient` 재생성 제거(라운드당 N+1회 → 재사용).
+- **본문 상한 chunked 우회 차단**: Content-Length 헤더만 보던 검사를 실제 수신 바이트를 세는
+  순수 ASGI `_BodySizeLimitMiddleware`로 대체 — `Transfer-Encoding: chunked` 우회 봉쇄
+  (실측: chunked 300KB → 413).
+
+### 인증·세션 위생
+
+- **게이트 deny-by-default**: 화이트리스트(게이트할 host 나열)에서 "로컬 루프백만 무게이트,
+  그 외 전부 게이트"로 반전 — 향후 도메인·프록시·재노출 추가 시 무게이트 개방 사고 방지.
+- **JWT aud 검증(하위호환)**: `aud` 클레임이 있으면 `symposium` 이어야 통과, 없으면 통과.
+  발급측(Alexandria) aud 도입 시 자동 강제. iss/typ 확장 여지.
+- **세션 소유자 결합**: 외부 게이트 경로에서 JWT `sub`를 세션에 기록(`scope["auth_sub"]`),
+  ask/direct 시 소유자 불일치면 403. 로컬 무게이트·소유자 없는 세션은 통과(하위호환).
+
+### 코드 위생
+
+- **모델 설정 단일화**: `config.CLAUDE_MODEL`의 죽은 값(opus-4-7) 정정 →
+  `claude-sonnet-4-6`. `web._call_claude`가 `config`에서 `CLAUDE_MODEL`·`CLAUDE_TIMEOUT`
+  import(하드코딩 제거).
+- **예외 원문 유출 차단**: symposium SSE의 `(응답 생성 실패: {e})` → 일반 메시지 +
+  `logger.exception`. 무음 검색 실패 4곳에 `logger.warning` 추가(관측성).
+- **버전 단일 진실원**: `src/symposium/__init__.py __version__`를 hatchling dynamic version으로
+  연결, `web.py`가 여기서 파생. pyproject/web.py 3중 하드코딩 제거.
+- **프롬프트 중복 제거**: `prompts.py`로 `SYSTEM_INSTRUCTION`/`THEOLOGIAN_SYSTEM_TEMPLATE`
+  추출 — web·cli 공유(cli 드리프트 해소).
+
 ## [0.15.1] - 2026-07-22
 
 ### Changed — 정적 UI 색상 하드코딩 변수화 (다크모드 하드코딩 정리)
