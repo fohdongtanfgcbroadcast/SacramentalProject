@@ -271,21 +271,32 @@ function hideSpeakerPicker() {
   speakerPicker.classList.add("hidden");
 }
 
-// --- Call theologian (direct) ---
+// --- Call theologian (스트리밍) ---
 async function callTheologian(authorKey) {
   isWaiting = true;
   addWaitingMessage(authorKey);
 
   try {
-    const res = await fetch("/api/symposium/direct", {
+    const res = await fetch("/api/symposium/direct-stream", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ session_id: sessionId, message: currentQuestion, target: authorKey }),
     });
     if (!res.ok) throw new Error(await res.text());
-    const data = await res.json();
     removeWaiting();
-    addTheologianMessage(data);
+
+    let msgEl = null, bodyEl = null, acc = "";
+    await consumeSSE(res, (event, data) => {
+      if (event === "start") {
+        const created = createStreamingMessage(data);
+        msgEl = created.el; bodyEl = created.body;
+      } else if (event === "delta") {
+        acc += data.text;
+        if (bodyEl) { bodyEl.textContent = acc; scrollToBottom(); }
+      } else if (event === "end") {
+        if (data.sources && data.sources.length > 0 && msgEl) appendSources(msgEl, data.sources);
+      }
+    });
     spokenInRound.add(authorKey);
   } catch (e) {
     removeWaiting();
@@ -296,41 +307,64 @@ async function callTheologian(authorKey) {
   showSpeakerPicker();
 }
 
+// SSE 스트림(fetch ReadableStream) 파서 — event/data 프레임 단위로 콜백
+async function consumeSSE(res, onEvent) {
+  const reader = res.body.getReader();
+  const decoder = new TextDecoder();
+  let buf = "";
+  while (true) {
+    const { done, value } = await reader.read();
+    if (done) break;
+    buf += decoder.decode(value, { stream: true }).replace(/\r\n/g, "\n");
+    let idx;
+    while ((idx = buf.indexOf("\n\n")) >= 0) {
+      const frame = buf.slice(0, idx);
+      buf = buf.slice(idx + 2);
+      let event = "message", data = "";
+      for (const line of frame.split("\n")) {
+        if (line.startsWith("event:")) event = line.slice(6).trim();
+        else if (line.startsWith("data:")) data += line.slice(5).trim();
+      }
+      if (data) {
+        try { onEvent(event, JSON.parse(data)); } catch (e) {}
+      }
+    }
+  }
+}
+
+// 스트리밍 메시지 컨테이너 생성(헤더 + 빈 본문). 델타가 본문에 누적된다.
+function createStreamingMessage(data) {
+  const div = document.createElement("div");
+  div.className = "chat-msg chat-msg-theologian";
+  const header = document.createElement("div");
+  header.className = "chat-msg-header";
+  header.innerHTML = `<span class="speaker-name">${escapeHtml(data.name_ko)}</span>` +
+    (data.tradition ? `<span class="speaker-era">${escapeHtml(data.tradition)}</span>` : "");
+  const body = document.createElement("div");
+  body.className = "chat-msg-body";
+  div.appendChild(header);
+  div.appendChild(body);
+  chatMessages.appendChild(div);
+  scrollToBottom();
+  return { el: div, body: body };
+}
+
+// 참고 자료 블록을 메시지에 추가(스트림 종료 시)
+function appendSources(msgEl, sources) {
+  const details = document.createElement("details");
+  details.className = "chat-sources";
+  details.innerHTML = `<summary>참고 자료 (${sources.length})</summary>` +
+    sources.map(s =>
+      `<div class="source-item">[${escapeHtml(s.title)}, p.${escapeHtml(String(s.page))}] ${escapeHtml(s.text)}</div>`
+    ).join("");
+  msgEl.appendChild(details);
+}
+
 // --- DOM Helpers ---
 function addUserMessage(text) {
   const div = document.createElement("div");
   div.className = "chat-msg chat-msg-user";
   div.textContent = text;
-  chatMessages.appendChild(div);
-  scrollToBottom();
-}
-
-function addTheologianMessage(data) {
-  const div = document.createElement("div");
-  div.className = "chat-msg chat-msg-theologian";
-
-  const header = document.createElement("div");
-  header.className = "chat-msg-header";
-  header.innerHTML = `<span class="speaker-name">${escapeHtml(data.name_ko)}</span>` +
-    (data.tradition ? `<span class="speaker-era">${escapeHtml(data.tradition)}</span>` : "");
-
-  const body = document.createElement("div");
-  body.className = "chat-msg-body";
-  body.textContent = data.text;
-
-  div.appendChild(header);
-  div.appendChild(body);
-
-  if (data.sources && data.sources.length > 0) {
-    const details = document.createElement("details");
-    details.className = "chat-sources";
-    details.innerHTML = `<summary>참고 자료 (${data.sources.length})</summary>` +
-      data.sources.map(s =>
-        `<div class="source-item">[${escapeHtml(s.title)}, p.${s.page}] ${escapeHtml(s.text)}</div>`
-      ).join("");
-    div.appendChild(details);
-  }
-
   chatMessages.appendChild(div);
   scrollToBottom();
 }

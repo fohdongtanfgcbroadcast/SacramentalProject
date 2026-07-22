@@ -2,6 +2,40 @@
 
 이 프로젝트의 주요 변경 사항을 기록한다. (이전 변경은 git 로그 참조)
 
+## [0.17.0] - 2026-07-22
+
+정밀검수 잔여 항목(§6 심층방어 · §7 개선 가설) 구현. 신규 테스트 4개(총 55 pass).
+
+### 심층방어 (§6)
+
+- **MCP 상속 봉인**: `_call_claude`/`_call_claude_stream` argv에 `--strict-mcp-config` +
+  빈 `--mcp-config '{"mcpServers":{}}'` 추가 — 서버 subprocess가 전역 `~/.claude`의 MCP를
+  상속하지 않음(향후 셸형 MCP 전역 추가 시 자동 차단). 인증·정상 답변 유지 실측 확인.
+- **훅 격리는 미적용(불가 확인)**: `CLAUDE_CONFIG_DIR` 격리와 `--bare`는 구독(keychain/OAuth)
+  인증을 깨뜨려("Not logged in") 라이브 답변이 중단됨을 실측. `--settings` 훅 오버라이드도
+  전역 훅을 못 끔. SessionStart 훅(session_id 기록용, 프롬프트 비관여 양성)은 수용. 코드 주석
+  으로 근거·재검토 조건 문서화.
+
+### 개선 (§7)
+
+- **라이트/다크 테마 토글**: `[data-theme="light"]` 워엄-파치먼트 팔레트(style.css·masterplan.html
+  `:root` 오버라이드) + 우상단 토글 버튼 + `theme.js`(localStorage·prefers-color-scheme,
+  `<head>`에서 즉시 적용해 FOUC 방지). 인라인 스크립트 없음(CSP `script-src 'self'` 준수).
+  style.css v7, theme.js v1.
+- **요청 관측성**: `logs/app.log` 회전 파일 핸들러 + 미들웨어에서 요청 경로/상태/지연(정적 제외),
+  `_call_claude`에 elapsed/out/waiters 기록(민감 본문·프롬프트 미로깅).
+- **세션 지속화(재시작 생존)**: `session.py`에 SQLite write-through(`data/sessions.db`) +
+  서버 시작 시 `restore()`로 만료 전 세션 복원. 공개 인터페이스 불변, 모든 DB 연산 try/except
+  로 degrade(실패해도 인메모리 정상). TTL/LRU 축출은 DB에도 반영.
+- **자산 백업**: `scripts/backup.sh`(경량 기본=metadata·glossary·recommended·sessions.db ~52K,
+  `SYMPOSIUM_BACKUP_FULL=1`이면 raw·chroma 포함) + `deploy/com.symposium.backup.plist`(주간
+  일요일 04:00, 최근 8개 보관). chroma_db(9.3G)는 재인덱싱으로 재생성 가능해 기본 제외.
+- **답변 스트리밍**: `_call_claude_stream`(claude `--output-format stream-json
+  --include-partial-messages`, 텍스트 델타 async yield, 전체 데드라인·disconnect 회수) +
+  신규 SSE 엔드포인트 `POST /api/symposium/direct-stream`. 프론트 `callTheologian`이 토큰을
+  증분 렌더(TTFT 개선). 기존 `/direct`(JSON)는 Alexandria 프록시(`/api/sym-rt/direct`) 계약
+  유지 위해 보존 — 외부는 비스트리밍 그대로. 부수: source page 이스케이프 보강(XSS 심층방어).
+
 ## [0.16.1] - 2026-07-22
 
 ### Fixed — 홈 푸터 Masterplan 링크 색상 (사용자 보고)

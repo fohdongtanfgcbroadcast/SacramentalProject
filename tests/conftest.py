@@ -10,11 +10,25 @@ def web_module():
 
 
 @pytest.fixture(autouse=True)
-def _clear_sessions():
+def _clear_sessions(tmp_path, monkeypatch):
     import symposium.session as s
+    # 세션 지속화 DB를 테스트별 임시 파일로 격리(실 sessions.db 오염 방지)
+    monkeypatch.setattr(s, "_DB_PATH", str(tmp_path / "test_sessions.db"))
+    if s._conn is not None:
+        try:
+            s._conn.close()
+        except Exception:
+            pass
+    s._conn = None
     s._sessions.clear()
     yield
     s._sessions.clear()
+    if s._conn is not None:
+        try:
+            s._conn.close()
+        except Exception:
+            pass
+        s._conn = None
 
 
 @pytest.fixture

@@ -5,6 +5,11 @@ chroma_db/
 *.pdf
 *.epub
 
+# --- 런타임 상태 (세션 지속화 DB · 로그) ---
+data/sessions.db
+data/sessions.db-*
+logs/
+
 # --- 환경 변수 / 비밀 ---
 .env
 .env.local
@@ -32,3 +37,4 @@ models/
 *.swp
 .DS_Store
 Thumbs.db
+.gstack/

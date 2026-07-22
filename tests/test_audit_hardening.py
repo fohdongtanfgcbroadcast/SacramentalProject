@@ -213,3 +213,57 @@ def test_model_pinned_sonnet(web_module):
 def test_version_single_source(web_module):
     from symposium import __version__
     assert web_module.app.version == __version__
+
+
+# --- 세션 지속화 (§7) ---
+
+def test_session_persist_and_restore():
+    import symposium.session as s
+    ses = s.create_session(["moltmann"], owner="alice")
+    s.add_message(ses.session_id, "user", "안녕")
+    s.add_message(ses.session_id, "theologian", "답", speaker="moltmann", name_ko="몰트만")
+    s._sessions.clear()  # 재시작 시뮬레이션
+    assert s.restore() == 1
+    r = s.get_session(ses.session_id)
+    assert r is not None and r.owner == "alice"
+    assert len(r.history) == 2 and r.history[0]["text"] == "안녕"
+
+
+def test_session_expired_not_restored():
+    import symposium.session as s
+    ses = s.create_session(["moltmann"])
+    ses.last_active -= s.SESSION_TTL_SECONDS + 100
+    s._persist(ses)
+    s._sessions.clear()
+    assert s.restore() == 0
+    assert s.get_session(ses.session_id) is None
+
+
+def test_direct_stream_sse(client, web_module, monkeypatch):
+    async def fake_stream(prompt):
+        for t in ["가", "나", "다"]:
+            yield t
+    monkeypatch.setattr(web_module, "_call_claude_stream", fake_stream)
+    sid = client.post("/api/symposium/start", json={"theologians": ["moltmann"]}).json()["session_id"]
+    with client.stream("POST", "/api/symposium/direct-stream",
+                       json={"session_id": sid, "message": "q", "target": "moltmann"}) as r:
+        assert r.status_code == 200
+        body = "\n".join(line for line in r.iter_lines())
+    assert "start" in body and "가" in body and "다" in body
+    import symposium.session as s
+    ses = s.get_session(sid)
+    assert any(h["role"] == "theologian" and h["text"] == "가나다" for h in ses.history)
+
+
+def test_session_db_failure_degrades_gracefully(monkeypatch):
+    # DB 연산(_db)이 실패해도 인메모리 세션은 정상 동작해야 함(_persist/_forget 내부 try/except)
+    import symposium.session as s
+
+    def boom():
+        raise RuntimeError("db down")
+
+    monkeypatch.setattr(s, "_db", boom)
+    ses = s.create_session(["moltmann"])  # _persist 가 예외를 삼킴
+    assert s.get_session(ses.session_id) is not None
+    s.add_message(ses.session_id, "user", "hi")
+    assert len(s.get_session(ses.session_id).history) == 1

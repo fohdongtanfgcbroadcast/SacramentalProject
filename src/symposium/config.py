@@ -6,6 +6,8 @@ RAW_DIR = DATA_ROOT / "raw"
 PROCESSED_DIR = DATA_ROOT / "processed"
 METADATA_DIR = DATA_ROOT / "metadata"
 CHROMA_DIR = PROJECT_ROOT / "chroma_db"
+# 세션 지속화 SQLite — 서버 재시작/크래시 후 진행 중 향연 복원용(write-through)
+SESSIONS_DB = DATA_ROOT / "sessions.db"
 
 EMBEDDING_MODEL = "BAAI/bge-m3"
 

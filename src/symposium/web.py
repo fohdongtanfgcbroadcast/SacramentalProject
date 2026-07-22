@@ -23,13 +23,37 @@ from symposium.config import (
     RELEVANCE_SOFT_MAX,
 )
 from symposium.retrieve import search
-from symposium.session import create_session, get_session, add_message
+from symposium.session import create_session, get_session, add_message, restore
 
 logger = logging.getLogger("symposium")
 
 PROJECT_ROOT = Path(__file__).resolve().parent.parent.parent
 STATIC_DIR = PROJECT_ROOT / "static"
 CONFESSIONS_DIR = (PROJECT_ROOT / "data" / "raw" / "confessions").resolve()
+
+# 관측성: 요청·claude 호출 지표를 회전 파일 로그로 남긴다(민감 본문/프롬프트 제외).
+# 비개발자 운영자의 장애 진단·구독 쿼터 추이 파악 근거.
+try:
+    _LOG_DIR = PROJECT_ROOT / "logs"
+    _LOG_DIR.mkdir(exist_ok=True)
+    if not logger.handlers:
+        from logging.handlers import RotatingFileHandler
+        _h = RotatingFileHandler(_LOG_DIR / "app.log", maxBytes=2_000_000,
+                                 backupCount=3, encoding="utf-8")
+        _h.setFormatter(logging.Formatter("%(asctime)s %(levelname)s %(message)s"))
+        logger.addHandler(_h)
+        logger.setLevel(logging.INFO)
+        logger.propagate = False
+except Exception:
+    pass
+
+# 서버 시작 시 지속화된 세션 복원(재시작/크래시 후 진행 중 향연 유지)
+try:
+    _restored = restore()
+    if _restored:
+        logger.info("세션 복원 %d개", _restored)
+except Exception:
+    pass
 
 # 요청 본문 크기 상한(256KB) — 대형 페이로드로 인한 메모리/프롬프트 증폭 방지
 MAX_BODY_BYTES = 256 * 1024
@@ -171,7 +195,13 @@ async def _external_auth_gate(request: Request, call_next):
 @app.middleware("http")
 async def _security_middleware(request: Request, call_next):
     # 본문 크기 상한은 _BodySizeLimitMiddleware(순수 ASGI)가 실제 수신 바이트 기준으로 강제한다.
+    _t0 = _time.perf_counter()
     response = await call_next(request)
+    # 관측성: 정적 자산 제외한 요청의 경로·상태·지연 기록(민감 본문 미포함)
+    path = request.url.path
+    if not path.startswith("/static"):
+        logger.info("%s %s -> %s %.0fms", request.method, path,
+                    response.status_code, (_time.perf_counter() - _t0) * 1000)
     # 보안 응답 헤더(심층방어). 인라인 스크립트 없음 → script-src 'self'.
     # script-src 'self'(인라인 스크립트/이벤트핸들러 차단=핵심 XSS 방어)는 엄격 유지.
     # style-src 는 UI가 동적 인라인 style 속성(era 색상 등)을 쓰므로 'unsafe-inline' 허용
@@ -198,6 +228,13 @@ _claude_lock = asyncio.Lock()
 # 락 대기자 상한 — 초과 시 429(전역 락 무한 적체·워커 아사 방지)
 _MAX_CLAUDE_WAITERS = 8
 _claude_waiters = 0
+
+# §6 심층방어: 서버 subprocess 가 전역 ~/.claude 의 MCP 설정을 상속하지 않도록 봉인한다.
+# (--strict-mcp-config + 빈 mcpServers). 신학 답변은 순수 텍스트 생성이라 MCP 불필요.
+# 주의: advisor 등 '플러그인'은 MCP 가 아니라 여기서 봉인되지 않는다(모델 호출일 뿐 RCE 아님).
+# 훅 격리(SessionStart)는 CLAUDE_CONFIG_DIR/--bare 가 구독(keychain) 인증을 깨뜨려 미적용
+# (해당 훅은 session_id 기록용 양성). 향후 셸형 MCP 전역 추가 시 이 봉인이 상속을 막는다.
+_CLAUDE_MCP_SEAL = ["--strict-mcp-config", "--mcp-config", '{"mcpServers":{}}']
 
 # 프롬프트 지시문은 prompts.py 단일 진실원에서 가져온다(web·cli 공유, 드리프트 방지).
 from symposium.prompts import SYSTEM_INSTRUCTION, THEOLOGIAN_SYSTEM_TEMPLATE
@@ -466,8 +503,10 @@ async def _call_claude(prompt: str) -> str:
             # defaultMode=bypassPermissions + allow=[Bash(*)/Edit(*)/...] 이므로, 이 플래그가 없으면
             # 사용자 입력(프롬프트 인젝션)이 호스트 셸 실행(RCE)으로 이어진다. 신학 답변은 순수 텍스트
             # 생성이라 도구가 불필요하다. (실증: 플래그 없으면 양성 프롬프트로도 파일 생성됨)
+            t0 = _time.perf_counter()
             proc = await asyncio.create_subprocess_exec(
-                "claude", "--print", "--tools", "", "--model", CLAUDE_MODEL,
+                "claude", "--print", "--tools", "", *_CLAUDE_MCP_SEAL,
+                "--model", CLAUDE_MODEL,
                 stdin=asyncio.subprocess.PIPE,
                 stdout=asyncio.subprocess.PIPE,
                 stderr=asyncio.subprocess.PIPE,
@@ -490,12 +529,82 @@ async def _call_claude(prompt: str) -> str:
                         await proc.wait()
                     except Exception:
                         pass
+            elapsed = _time.perf_counter() - t0
             if proc.returncode != 0:
                 err = stderr.decode("utf-8", errors="replace")
-                logger.error("claude CLI 오류(rc=%s): %s", proc.returncode, err[:500])
+                logger.error("claude CLI 오류(rc=%s, %.1fs): %s", proc.returncode, elapsed, err[:500])
                 raise HTTPException(status_code=502, detail="응답 생성에 실패했습니다.")
-            return stdout.decode("utf-8").strip()
+            out = stdout.decode("utf-8").strip()
+            logger.info("claude ok %.1fs out=%dB waiters=%d", elapsed, len(out), _claude_waiters)
+            return out
     finally:
+        _claude_waiters -= 1
+
+
+async def _call_claude_stream(prompt: str):
+    """claude 를 stream-json 으로 호출하여 텍스트 델타를 순차 yield(TTFT 개선).
+
+    stream-json 라인 중 content_block_delta/text_delta 만 방출. 전역 락·대기자 상한·
+    타임아웃(전체 데드라인)·disconnect 취소 시 subprocess 회수는 _call_claude 와 동일 규율.
+    """
+    global _claude_waiters
+    if _claude_waiters >= _MAX_CLAUDE_WAITERS:
+        raise HTTPException(status_code=429, detail="서버가 혼잡합니다. 잠시 후 다시 시도하세요.")
+    _claude_waiters += 1
+    proc = None
+    try:
+        async with _claude_lock:
+            t0 = _time.perf_counter()
+            proc = await asyncio.create_subprocess_exec(
+                "claude", "--print", "--tools", "", *_CLAUDE_MCP_SEAL,
+                "--model", CLAUDE_MODEL, "--output-format", "stream-json",
+                "--include-partial-messages", "--verbose",
+                stdin=asyncio.subprocess.PIPE,
+                stdout=asyncio.subprocess.PIPE,
+                stderr=asyncio.subprocess.DEVNULL,
+            )
+            try:
+                proc.stdin.write(prompt.encode("utf-8"))
+                await proc.stdin.drain()
+                proc.stdin.close()
+            except Exception:
+                pass
+            loop = asyncio.get_event_loop()
+            deadline = loop.time() + CLAUDE_TIMEOUT
+            emitted = 0
+            while True:
+                remaining = deadline - loop.time()
+                if remaining <= 0:
+                    logger.warning("claude 스트림 타임아웃(%ss)", CLAUDE_TIMEOUT)
+                    raise HTTPException(status_code=504, detail="응답 생성 시간 초과")
+                try:
+                    line = await asyncio.wait_for(proc.stdout.readline(), timeout=remaining)
+                except asyncio.TimeoutError:
+                    logger.warning("claude 스트림 타임아웃(%ss)", CLAUDE_TIMEOUT)
+                    raise HTTPException(status_code=504, detail="응답 생성 시간 초과")
+                if not line:
+                    break
+                try:
+                    obj = json.loads(line)
+                except Exception:
+                    continue
+                if obj.get("type") == "stream_event":
+                    ev = obj.get("event", {})
+                    if ev.get("type") == "content_block_delta":
+                        d = ev.get("delta", {})
+                        if d.get("type") == "text_delta" and d.get("text"):
+                            emitted += len(d["text"])
+                            yield d["text"]
+            logger.info("claude stream ok %.1fs out=%dB waiters=%d",
+                        _time.perf_counter() - t0, emitted, _claude_waiters)
+    finally:
+        # disconnect(취소)·타임아웃 등에서 subprocess 회수(구독 낭비 방지)
+        if proc is not None and proc.returncode is None:
+            proc.kill()
+            try:
+                await proc.wait()
+            except Exception:
+                pass
         _claude_waiters -= 1
 
 
@@ -815,3 +924,66 @@ async def symposium_direct(req: SymposiumDirectRequest, request: Request):
         "text": answer,
         "sources": sources,
     }
+
+
+@app.post("/api/symposium/direct-stream")
+async def symposium_direct_stream(req: SymposiumDirectRequest, request: Request):
+    """direct 의 스트리밍(SSE) 버전 — 토큰 델타를 흘려 TTFT 체감 개선.
+
+    기존 /direct(JSON)는 Alexandria 프록시(/api/sym-rt/direct)가 소비하므로 계약 유지 목적
+    으로 보존하고, 로컬 프론트만 이 엔드포인트를 사용한다(외부는 비스트리밍 그대로 동작).
+    """
+    session = get_session(req.session_id)
+    if session is None:
+        raise HTTPException(404, "세션을 찾을 수 없습니다.")
+    _check_session_owner(session, request)
+    if req.target not in session.theologians:
+        raise HTTPException(400, f"{req.target}은 이 향연에 초대되지 않았습니다.")
+
+    add_message(req.session_id, "user", req.message)
+
+    confession_hits = []
+    if session.confession:
+        try:
+            confession_hits = search(req.message, "confessions", CHROMA_DIR, top_k=5)
+        except Exception:
+            logger.warning("고백서 검색 실패 (session=%s…)", req.session_id[:8])
+            confession_hits = []
+
+    meta = _get_author_meta(req.target)
+    try:
+        hits = search(req.message, req.target, CHROMA_DIR, top_k=5)
+    except Exception:
+        logger.warning("검색 실패 (author=%s) — 근거 없이 진행", req.target)
+        hits = []
+
+    prompt = _build_theologian_prompt(meta, req.message, hits, session.history,
+                                      confession_hits, session.confession_name)
+    sources = [
+        {"title": h["metadata"].get("title", "?"), "page": h["metadata"].get("page", "?"),
+         "text": h["text"][:300]}
+        for h in hits[:3]
+    ]
+
+    async def gen():
+        yield {"event": "start", "data": json.dumps(
+            {"speaker": req.target, "name_ko": meta["name_ko"], "tradition": meta.get("tradition", "")},
+            ensure_ascii=False)}
+        parts: list[str] = []
+        try:
+            async for delta in _call_claude_stream(prompt):
+                parts.append(delta)
+                yield {"event": "delta", "data": json.dumps({"text": delta}, ensure_ascii=False)}
+        except Exception:
+            logger.exception("스트리밍 답변 생성 실패 (author=%s)", req.target)
+            if not parts:
+                yield {"event": "delta", "data": json.dumps(
+                    {"text": "(응답 생성에 실패했습니다.)"}, ensure_ascii=False)}
+        answer = "".join(parts).strip()
+        if answer:
+            add_message(req.session_id, "theologian", answer, speaker=req.target, name_ko=meta["name_ko"])
+        yield {"event": "end", "data": json.dumps(
+            {"speaker": req.target, "name_ko": meta["name_ko"], "sources": sources},
+            ensure_ascii=False)}
+
+    return EventSourceResponse(gen())
