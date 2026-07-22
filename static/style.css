@@ -227,6 +227,13 @@ footer {
   font-size: 0.8rem;
 }
 
+/* 앵커 기본색: 규칙 부재 시 브라우저 기본 파랑/보라(방문)가 다크 배경에 그대로 노출됨
+   (홈 푸터 Masterplan 링크 사용자 보고, 2026-07-22). 테마 변수로 통일 —
+   전용 클래스(.back-link 등)는 선택자가 더 구체적이라 기존 스타일 유지. */
+a { color: var(--accent); }
+a:hover { color: var(--accent-hover); }
+a:visited { color: var(--accent); }
+
 @media (max-width: 600px) {
   .input-row { flex-direction: column; }
   select { width: 100%; }

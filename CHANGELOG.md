@@ -2,6 +2,18 @@
 
 이 프로젝트의 주요 변경 사항을 기록한다. (이전 변경은 git 로그 참조)
 
+## [0.16.1] - 2026-07-22
+
+### Fixed — 홈 푸터 Masterplan 링크 색상 (사용자 보고)
+
+- `style.css`에 앵커(`a`) 색상 규칙이 없어 홈(index.html) 푸터의 Masterplan 링크가
+  **브라우저 기본 파랑/보라(방문)** 로 다크 배경에 노출되던 문제 — 0.15.1 변수화 때
+  놓친 잔여(그 작업은 `:root` 밖 하드코딩 색상값 대상이라 '규칙 부재' 케이스는 미포착).
+- 전역 `a`/`a:hover`/`a:visited`를 테마 변수(`--accent`/`--accent-hover`)로 지정.
+  전용 클래스(.back-link 등)는 더 구체적 선택자라 기존 스타일 유지. masterplan.html
+  푸터는 자체 `.footer a` 규칙이 이미 있어 무영향.
+- style.css 캐시버스트 v6(index·symposium 통일). 검증: computed color = #c49a5c(--accent).
+
 ## [0.16.0] - 2026-07-22
 
 정밀검수(8차원 60에이전트 리뷰 + 적대적 검증, `docs/security/AUDIT_2026-07-22.md`) 대응 —
