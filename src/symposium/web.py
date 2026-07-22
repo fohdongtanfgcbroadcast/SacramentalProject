@@ -27,9 +27,66 @@ CONFESSIONS_DIR = (PROJECT_ROOT / "data" / "raw" / "confessions").resolve()
 MAX_BODY_BYTES = 256 * 1024
 
 # 대화형 API 문서(/docs·/redoc·/openapi.json)는 비활성 — 스키마 정찰 표면 축소
-app = FastAPI(title="Symposium", version="0.14.1",
+app = FastAPI(title="Symposium", version="0.15.0",
               docs_url=None, redoc_url=None, openapi_url=None)
 app.mount("/static", StaticFiles(directory=str(STATIC_DIR)), name="static")
+
+
+# ─── 외부(도메인) 접근 인증 게이트 (0.15.0) ───────────────────────
+# symposium.nt-apparatus.com(Cloudflare 터널 경유) 요청만 Alexandria JWT 쿠키(access_token,
+# HS256, 동일 JWT_SECRET)를 요구한다. 로컬 직접 접속(Host=127.0.0.1/localhost)은 무게이트 —
+# 종전 로컬 전용 사용성 보존. 검증은 서명+만료+role(approved/admin)만(stdlib, DB조회 없음;
+# 탈퇴자 즉시차단은 토큰만료 7일에 의존 — 소규모 사용자 수용, 2026-07-22 사용자 승인).
+import base64 as _b64
+import hashlib as _hashlib
+import hmac as _hmac
+import os as _os
+import time as _time
+
+from fastapi.responses import RedirectResponse
+
+_GATED_HOSTS = {"symposium.nt-apparatus.com"}
+_ALEX_LOGIN_URL = "https://nt-apparatus.com/login"
+_GATE_SECRET = _os.environ.get("JWT_SECRET", "")
+
+
+def _b64url_decode(seg: str) -> bytes:
+    return _b64.urlsafe_b64decode(seg + "=" * (-len(seg) % 4))
+
+
+def _verify_alex_jwt(token: str, secret: str) -> bool:
+    """HS256 JWT 검증(서명·exp·role). 외부 의존성 없이 stdlib만 사용."""
+    try:
+        header_b64, payload_b64, sig_b64 = token.split(".")
+        header = json.loads(_b64url_decode(header_b64))
+        if header.get("alg") != "HS256":
+            return False
+        expected = _hmac.new(secret.encode(), f"{header_b64}.{payload_b64}".encode(),
+                             _hashlib.sha256).digest()
+        if not _hmac.compare_digest(expected, _b64url_decode(sig_b64)):
+            return False
+        payload = json.loads(_b64url_decode(payload_b64))
+        if int(payload.get("exp", 0)) < _time.time():
+            return False
+        return payload.get("role") in ("approved", "admin")
+    except Exception:
+        return False
+
+
+@app.middleware("http")
+async def _external_auth_gate(request: Request, call_next):
+    host = (request.headers.get("host") or "").split(":")[0].lower()
+    if host in _GATED_HOSTS:
+        if not _GATE_SECRET:
+            # 게이트 미구성 상태로 외부 서빙 금지(fail-closed)
+            return JSONResponse({"detail": "인증 게이트가 구성되지 않았습니다."}, status_code=503)
+        token = request.cookies.get("access_token", "")
+        if not _verify_alex_jwt(token, _GATE_SECRET):
+            accept = request.headers.get("accept", "")
+            if "text/html" in accept:
+                return RedirectResponse(url=_ALEX_LOGIN_URL, status_code=302)
+            return JSONResponse({"detail": "로그인이 필요합니다."}, status_code=401)
+    return await call_next(request)
 
 
 @app.middleware("http")

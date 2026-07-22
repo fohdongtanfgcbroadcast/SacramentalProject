@@ -2,6 +2,22 @@
 
 이 프로젝트의 주요 변경 사항을 기록한다. (이전 변경은 git 로그 참조)
 
+## [0.15.0] - 2026-07-22
+
+### Added — 외부 도메인 접근 (symposium.nt-apparatus.com, SSO 인증 게이트)
+
+- 사용자 결정으로 "로컬 전용"(0.13.0) 공식 해제 — 단 무인증 노출이 아니라 **Alexandria 계정
+  SSO 게이트 뒤** 노출. cloudflared named tunnel ingress에 `symposium.nt-apparatus.com →
+  localhost:8000` 추가 + `tunnel route dns` CNAME(config 백업 `~/.cloudflared/config.yml.bak_20260722`).
+- **`_external_auth_gate` 미들웨어**: Host가 symposium.nt-apparatus.com일 때만 Alexandria JWT
+  쿠키(access_token, HS256 동일 시크릿, plist env 주입) 검증 — stdlib hmac 검증(서명·exp·
+  role∈approved/admin), 미인증 HTML→nt-apparatus.com/login 302·API→401, 시크릿 미설정 시
+  fail-closed 503. **로컬(127.0.0.1) 직접 접속은 무게이트**(종전 사용성 보존).
+  한계(명시): DB 미조회라 탈퇴자 즉시 차단은 안 됨 — 토큰 만료 7일 의존(소규모 수용).
+- Alexandria 측: 로그인 쿠키 조건부 `domain=.nt-apparatus.com`(v9.95) + 서가 탭 링크
+  `https://symposium.nt-apparatus.com/symposium` 상시 표시(로컬 접속 시 127.0.0.1로 자동 전환).
+- 검증: 로컬 200 / 외부 비인증 401·302(login 리다이렉트) / 외부 인증 200 / 본체 도메인 무영향.
+
 ## [0.14.2] - 2026-07-22
 
 ### Changed — 원탁대화 Claude 호출 모델 핀 + 타임아웃 (Alexandria 연동)
