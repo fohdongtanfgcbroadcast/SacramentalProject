@@ -27,7 +27,7 @@ CONFESSIONS_DIR = (PROJECT_ROOT / "data" / "raw" / "confessions").resolve()
 MAX_BODY_BYTES = 256 * 1024
 
 # 대화형 API 문서(/docs·/redoc·/openapi.json)는 비활성 — 스키마 정찰 표면 축소
-app = FastAPI(title="Symposium", version="0.15.0",
+app = FastAPI(title="Symposium", version="0.15.1",
               docs_url=None, redoc_url=None, openapi_url=None)
 app.mount("/static", StaticFiles(directory=str(STATIC_DIR)), name="static")
 

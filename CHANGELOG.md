@@ -2,6 +2,21 @@
 
 이 프로젝트의 주요 변경 사항을 기록한다. (이전 변경은 git 로그 참조)
 
+## [0.15.1] - 2026-07-22
+
+### Changed — 정적 UI 색상 하드코딩 변수화 (다크모드 하드코딩 정리)
+
+- `static/style.css`: `:root` 밖에 직접 박혀 있던 색상 11곳을 CSS 변수로 치환 — 신규 변수 7종
+  (`--hero-top`, `--glow-1/2`, `--surface-raised`, `--border-strong`, `--text-on-accent`,
+  `--gold-tint`). 대상: 히어로 그라디언트, body 글로우, confession-card 배경/보더,
+  confession-context/truncated 골드 틴트, chat-msg-user·btn-primary 텍스트색,
+  picker-btn/topic-card/theologian-card-link hover 배경.
+- `static/masterplan.html`: 자체 `<style>` 블록의 하드코딩 4곳 변수화 — 신규 변수 4종
+  (`--hero-top`, `--card-done`, `--glow-1/2`).
+- 색상값 자체는 동일(시각 변화 0) — 향후 라이트/다크 테마 분기 시 `:root` 오버라이드만으로
+  대응 가능한 기반. 검증: 두 파일 모두 `:root` 밖 하드코딩 색상 0건, 라이브 서빙 확인.
+- `pyproject.toml` version 0.14.1로 뒤처져 있던 것 0.15.1로 동기화.
+
 ## [0.15.0] - 2026-07-22
 
 ### Added — 외부 도메인 접근 (symposium.nt-apparatus.com, SSO 인증 게이트)
