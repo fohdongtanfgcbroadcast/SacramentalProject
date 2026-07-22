@@ -2,6 +2,18 @@
 
 이 프로젝트의 주요 변경 사항을 기록한다. (이전 변경은 git 로그 참조)
 
+## [0.14.2] - 2026-07-22
+
+### Changed — 원탁대화 Claude 호출 모델 핀 + 타임아웃 (Alexandria 연동)
+
+- `_call_claude`: `--model claude-sonnet-4-6` 명시 핀. 기본모델(Opus) 상속 시 웜 상태에서도
+  60초 상한 초과("응답 생성 시간 초과")로 원탁대화가 무동작이었음(2회 실측) + Opus 구독 소진.
+  핀 후 실측 38.6초 정상 답변(칼뱅 페르소나·출처 3건).
+- `_CLAUDE_TIMEOUT` 60→90초 (콜드스타트 마진).
+- 운영: 무인증 퀵터널 `com.symposium.tunnel` 언로드+plist `.disabled`(2026-07-07 로컬전용 결정
+  복원 — 재부팅 RunAtLoad로 되살아나 있었음). 외부 접근은 Alexandria(nt-apparatus.com)의
+  인증 게이트 프록시 `/api/sym-rt/*` 경유로 일원화(Alexandria v9.92).
+
 ## [0.14.1] - 2026-07-14
 
 ### Fixed — 데이터 품질 측정 도구 (`scripts/measure_corpus_noise.py`)

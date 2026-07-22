@@ -289,7 +289,8 @@ def _load_recommended_questions() -> dict:
         return json.load(f)
 
 
-_CLAUDE_TIMEOUT = 60  # claude 호출 상한(초) — 워커 장기 점유 방지
+_CLAUDE_TIMEOUT = 90  # claude 호출 상한(초) — 워커 장기 점유 방지 (콜드스타트 마진, 2026-07-22)
+_CLAUDE_MODEL = "claude-sonnet-4-6"  # 모델 명시 핀 — 기본모델(Opus) 상속 시 60s 초과·구독 소진 (2026-07-22)
 
 
 async def _call_claude(prompt: str) -> str:
@@ -306,7 +307,7 @@ async def _call_claude(prompt: str) -> str:
             # 사용자 입력(프롬프트 인젝션)이 호스트 셸 실행(RCE)으로 이어진다. 신학 답변은 순수 텍스트
             # 생성이라 도구가 불필요하다. (실증: 플래그 없으면 양성 프롬프트로도 파일 생성됨)
             proc = await asyncio.create_subprocess_exec(
-                "claude", "--print", "--tools", "",
+                "claude", "--print", "--tools", "", "--model", _CLAUDE_MODEL,
                 stdin=asyncio.subprocess.PIPE,
                 stdout=asyncio.subprocess.PIPE,
                 stderr=asyncio.subprocess.PIPE,
